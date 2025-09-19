@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicConnect - Access Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="mode-toggle">
+        <input type="checkbox" id="darkModeToggle" class="checkbox">
+        <label for="darkModeToggle" class="label">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+            <div class="ball"></div>
+        </label>
+    </div>
+
+    <div class="login-card">
+        <div class="role-selector">
+            <button class="role-btn active" id="userRoleBtn" data-role="user">
+                <i class="fas fa-user-friends"></i> User
+            </button>
+            <button class="role-btn" id="adminRoleBtn" data-role="admin">
+                <i class="fas fa-shield-alt"></i> Admin
+            </button>
+        </div>
+
+        <div class="form-content">
+            <div id="userForms" class="form-section active">
+                <div class="tab-selector">
+                    <button class="tab-btn active" id="loginTabBtn" data-tab="login">Login</button>
+                    <button class="tab-btn" id="signupTabBtn" data-tab="signup">Sign Up</button>
+                </div>
+
+                <form id="userLoginForm" class="active user-form">
+                    <h3>Login</h3>
+                    <div class="input-group">
+                        <i class="fas fa-envelope icon"></i>
+                        <input type="email" placeholder="Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" placeholder="Password" required>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <button type="submit" class="submit-btn">Login</button>
+                </form>
+
+                <form id="userSignupForm" class="user-form">
+                    <h3>Sign Up</h3>
+                     <div class="input-group">
+                        <i class="fas fa-user icon"></i>
+                        <input type="text" placeholder="Full Name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-envelope icon"></i>
+                        <input type="email" placeholder="Email" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" placeholder="Password" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" placeholder="Confirm Password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Sign Up</button>
+                </form>
+            </div>
+
+            <div id="adminForm" class="form-section">
+                <h3>Admin Verification</h3>
+                <form>
+                    <div class="input-group">
+                        <i class="fas fa-user-tie icon"></i>
+                        <input type="text" placeholder="Name" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-building icon"></i>
+                        <input type="text" placeholder="Department" required>
+                    </div>
+                    <div class="input-group">
+                        <i class="fas fa-id-card icon"></i>
+                        <input type="text" placeholder="Official ID" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Verify Access</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

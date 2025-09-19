@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Civic Issue Reporter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .upload-section {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .upload-section input[type="file"] {
+      margin: 10px 0;
+    }
+
+    .issue-post {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px auto;
+      max-width: 500px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .issue-post img {
+      width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+
+    .timer {
+      font-size: 14px;
+      color: #666;
+      margin-top: 8px;
+    }
+
+    .post-date {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .views {
+      font-size: 13px;
+      color: #555;
+      margin-top: 5px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Report a Civic Issue</h2>
+
+  <div class="upload-section">
+    <input type="file" id="imageUpload" accept="image/*">
+    <br>
+    <button onclick="uploadIssue()">Post Issue</button>
+  </div>
+
+  <div id="postsContainer"></div>
+
+  <script>
+    let serverTime = new Date();  // fallback to local time initially
+    let lastSyncTime = Date.now();
+
+    async function fetchServerTime() {
+      try {
+        const res = await fetch('https://worldtimeapi.org/api/ip');
+        const data = await res.json();
+        serverTime = new Date(data.datetime);
+      } catch (error) {
+        console.error('Error fetching server time:', error);
+        serverTime = new Date(); // fallback
+      }
+    }
+
+    function timeSince(pastDate, currentDate) {
+      const seconds = Math.floor((currentDate - pastDate) / 1000);
+
+      const intervals = [
+        { label: 'year', seconds: 31536000 },
+        { label: 'month', seconds: 2592000 },
+        { label: 'day', seconds: 86400 },
+        { label: 'hour', seconds: 3600 },
+        { label: 'minute', seconds: 60 },
+      ];
+
+      for (let i = 0; i < intervals.length; i++) {
+        const interval = Math.floor(seconds / intervals[i].seconds);
+        if (interval >= 1) {
+          return interval + ' ' + intervals[i].label + (interval > 1 ? 's' : '') + ' ago';
+        }
+      }
+
+      return seconds + ' seconds ago';
+    }
+
+    function updateTimers() {
+      const now = new Date(serverTime.getTime() + (Date.now() - lastSyncTime));
+      document.querySelectorAll('.issue-post').forEach(post => {
+        const timestamp = new Date(post.getAttribute('data-timestamp'));
+        const timeSpan = post.querySelector('.time-since');
+        timeSpan.textContent = timeSince(timestamp, now);
+      });
+    }
+
+    function uploadIssue() {
+      const fileInput = document.getElementById('imageUpload');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Please upload an image.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageUrl = e.target.result;
+        const postDate = new Date(serverTime.getTime() + (Date.now() - lastSyncTime));
+        const timestamp = postDate.toISOString();
+
+        const options = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
+        const formattedDate = postDate.toLocaleDateString(undefined, options);
+
+        const postHTML = `
+          <div class="issue-post" data-timestamp="${timestamp}" data-views="0">
+            <img src="${imageUrl}" alt="Issue Image" />
+            <div class="timer">
+              Posted: <span class="time-since">just now</span><br>
+              <span class="post-date">${formattedDate}</span><br>
+              <span class="views">👁️ 0 views</span>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('postsContainer')
+          .insertAdjacentHTML('afterbegin', postHTML);
+
+        fileInput.value = ''; 
+
+        observeViews(); // start tracking views for new post
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    // Track views using Intersection Observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const post = entry.target;
+          let views = parseInt(post.getAttribute('data-views'));
+          views++;
+          post.setAttribute('data-views', views);
+          post.querySelector('.views').textContent = `👁️ ${views} view${views !== 1 ? 's' : ''}`;
+        }
+      });
+    }, { threshold: 0.5 }); // at least 50% visible
+
+    function observeViews() {
+      document.querySelectorAll('.issue-post').forEach(post => {
+        if (!post.hasAttribute('data-observed')) {
+          observer.observe(post);
+          post.setAttribute('data-observed', 'true');
+        }
+      });
+    }
+
+    // Sync server time every 30 seconds
+    async function syncTimeLoop() {
+      await fetchServerTime();
+      lastSyncTime = Date.now();
+      setTimeout(syncTimeLoop, 30000);
+    }
+
+    syncTimeLoop();
+    setInterval(updateTimers, 1000);
+  </script>
+
+</body>
+</html>

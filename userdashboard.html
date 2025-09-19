@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nivaran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+
+  <!-- Navbar -->
+  <header class="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-800 shadow sticky top-0">
+    <h1 class="text-2xl font-bold">Nivaran</h1>
+    <nav class="space-x-6">
+      <a href="#" class="hover:text-blue-500">Home</a>
+      <a href="#" class="hover:text-blue-500">Issue</a>
+      <a href="#" class="hover:text-blue-500">Login</a>
+      <a href="#" class="hover:text-blue-500">Signup</a>
+      <button id="themeToggle" class="px-3 py-1 border rounded">🌙</button>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="text-center py-20 bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+    <h2 class="text-4xl font-bold mb-4">Welcome to Nivaran</h2>
+    <p class="max-w-2xl mx-auto text-lg">
+      Empowering communities to solve civic issues through collective action.
+    </p>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-16 px-6 max-w-6xl mx-auto">
+    <h3 class="text-3xl font-bold mb-8 text-center">How Nivaran Works</h3>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+        <h4 class="text-xl font-semibold mb-2">Report</h4>
+        <p>Citizens report local issues with text, image, or voice.</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+        <h4 class="text-xl font-semibold mb-2">Verify</h4>
+        <p>Our system verifies the authenticity of submitted reports.</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+        <h4 class="text-xl font-semibold mb-2">Resolve</h4>
+        <p>Authorities and community collaborate to resolve issues quickly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Nivaran -->
+  <section class="py-16 px-6 max-w-6xl mx-auto">
+    <h3 class="text-3xl font-bold mb-8 text-center">Why Choose Nivaran</h3>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+        <h4 class="text-xl font-semibold mb-2">Transparency</h4>
+        <p>Track issues in real-time from report to resolution.</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+        <h4 class="text-xl font-semibold mb-2">Community Engagement</h4>
+        <p>Encourages citizen participation and collaboration.</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow text-center">
+        <h4 class="text-xl font-semibold mb-2">Impact</h4>
+        <p>Brings real change by accelerating public issue resolution.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Achievements -->
+  <section class="py-16 px-6 max-w-6xl mx-auto">
+    <h3 class="text-3xl font-bold mb-8 text-center">Our Achievements</h3>
+    <div class="grid md:grid-cols-3 gap-8 text-center">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+        <h4 class="text-2xl font-bold text-blue-600 mb-2">5,000+</h4>
+        <p>Issues Reported</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+        <h4 class="text-2xl font-bold text-green-600 mb-2">3,800+</h4>
+        <p>Issues Resolved</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+        <h4 class="text-2xl font-bold text-purple-600 mb-2">120+</h4>
+        <p>Cities Covered</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="text-center py-6 border-t dark:border-gray-700">
+    <p>© 2025 Nivaran. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+  </script>
+
+</body>
+</html>

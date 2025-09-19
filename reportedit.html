@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gov.Report — User Reporting</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{
+    --bg:#f2f2f2; --nav:#1e3a8a; --accent:#fbc02d; --accent-urgent:#ff7043; --text:#111;
+    --card:#fff; --muted:#666; --success:#4caf50; --info:#2196f3;
+  }
+  body{margin:0;font-family:Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:var(--bg);transition:background .25s,color .25s}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--nav);color:#fff}
+  .logo{font-weight:700;color:var(--accent);letter-spacing:.6px}
+  .nav-actions{display:flex;gap:14px;align-items:center}
+  .btn {background:var(--accent);color:#0b1440;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+  .small-btn{background:transparent;border:0;color:var(--accent);font-size:18px;cursor:pointer}
+  .small-btn:hover{color:var(--info)}
+  .container{max-width:1000px;margin:22px auto;padding:0 18px}
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+  /* Left column (report form + tabs) */
+  .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(20,20,30,.08);transition:transform .18s,box-shadow .18s}
+  .card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(20,20,30,.09)}
+  h2{margin:0 0 10px;font-size:20px}
+  label{display:block;font-weight:600;margin:8px 0 6px}
+  input[type=text], textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:14px}
+  textarea{min-height:90px;resize:vertical}
+  .row{display:flex;gap:10px;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  .thumb{width:100%;height:180px;object-fit:cover;border-radius:8px;margin-top:10px}
+  .tabs{display:flex;gap:8px;margin:8px 0 14px}
+  .tab{padding:8px 12px;border-radius:8px;background:#eee;cursor:pointer;font-weight:600}
+  .tab.active{background:var(--nav);color:var(--accent)}
+  /* report list rows (excel-like) */
+  .report-row{display:grid;grid-template-columns:50px 110px 1fr 140px 40px;gap:12px;align-items:center;padding:10px;border-radius:10px;transition:background .18s,transform .18s}
+  .report-row:hover{background:#fff8e6;transform:translateY(-3px)}
+  .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 8px;border-radius:999px;font-weight:700}
+  .priority-high{color:#fff;background:#e53935;padding:6px 10px;border-radius:8px}
+  .priority-medium{color:#fff;background:var(--accent-urgent);padding:6px 10px;border-radius:8px}
+  .priority-low{color:#111;background:var(--accent);padding:6px 10px;border-radius:8px}
+  .tiny{font-size:12px;color:var(--muted)}
+  .report-thumb{width:60px;height:44px;object-fit:cover;border-radius:6px;border:1px solid #ddd}
+  .status-pill{padding:6px 8px;border-radius:8px;font-weight:700}
+  .status-submitted{background:#fff4e6;color:#b85f00}
+  .status-progress{background:#e8f5e9;color:#2e7d32}
+  .status-resolved{background:#e8f5e9;color:#2e7d32}
+  .center{text-align:center}
+
+  /* detail modal */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:999}
+  .modal.active{display:flex}
+  .modal-card{width:720px;max-width:96%;display:flex;gap:18px;background:var(--card);padding:18px;border-radius:12px}
+  .modal-left{flex:1}
+  .modal-right{width:300px}
+  .meta{font-size:13px;color:var(--muted);margin:4px 0}
+  .comment{border-top:1px solid #eee;padding:12px 0}
+  .comment .who{font-weight:700}
+  .upvote{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:#fff4e6;color:#b85f00;cursor:pointer}
+
+  /* toast */
+  .toast{position:fixed;right:20px;bottom:20px;background:var(--accent);color:#08102a;padding:12px 16px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.2);display:none;z-index:1500}
+
+  /* responsiveness */
+  @media (max-width:880px){
+    .grid{grid-template-columns:1fr; padding:0 12px}
+    .modal-card{flex-direction:column}
+    .modal-right{width:100%}
+  }
+
+  /* dark-mode overrides (keeps theme) */
+  .dark{--bg:#121212;--card:#1f1f1f;--text:#fff;--muted:#b0b0b0;--nav:#111827}
+  .dark body{background:var(--bg);color:var(--text)}
+  .dark .card{background:var(--card);box-shadow:none}
+  .dark input, .dark textarea, .dark select{background:#2b2b2b;color:#fff;border:1px solid #333}
+  .dark .report-row:hover{background:#2a2a2a}
+  .dark .filter-bar select:hover{background:#374151;color:#fff}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Gov.Admin — User</div>
+  <div class="nav-actions">
+    <button class="small-btn" id="darkBtn" title="Toggle dark mode"><i class="fa-regular fa-moon"></i></button>
+    <button class="btn" id="goAdmin" title="Switch to Admin view">Switch to Admin</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="grid">
+    <!-- LEFT: Submit & Reports list -->
+    <div>
+      <!-- Submit card -->
+      <div class="card" id="submitCard">
+        <h2>Report an Issue</h2>
+        <div class="muted">Your location will be captured (you can edit the address before submitting).</div>
+
+        <label>Category</label>
+        <select id="categoryInput">
+          <option>Pothole</option>
+          <option>Garbage</option>
+          <option>Streetlight</option>
+          <option>WaterLeak</option>
+          <option>Tree</option>
+          <option>Other</option>
+        </select>
+
+        <label>Description</label>
+        <textarea id="descInput" placeholder="Describe the issue... (what/where/how)"></textarea>
+
+        <label>Image</label>
+        <input type="file" id="imageInput" accept="image/*">
+
+        <div id="previewWrap" style="display:none">
+          <img id="previewImg" class="thumb" alt="preview">
+        </div>
+
+        <label>Location (editable)</label>
+        <input type="text" id="locationInput" placeholder="Fetching location..." />
+
+        <div class="row" style="margin-top:12px;justify-content:space-between">
+          <div class="muted tiny">You: <span id="currentUser">U_user_demo</span></div>
+          <div class="row">
+            <button class="btn" id="getLocBtn" title="Refresh location"><i class="fa-solid fa-location-crosshairs"></i>&nbsp; Get Location</button>
+            <button class="btn" id="submitBtn" style="margin-left:8px">Submit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs for user's submissions -->
+      <div style="margin-top:14px" class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Your Reports</h2>
+          <div class="muted tiny">Tap any category to open details</div>
+        </div>
+
+        <div style="margin-top:8px">
+          <div class="tabs">
+            <div class="tab active" data-tab="submitted">Submitted</div>
+            <div class="tab" data-tab="inprogress">In Progress</div>
+            <div class="tab" data-tab="resolved">Resolved</div>
+            <div class="tab" data-tab="history">History</div>
+          </div>
+
+          <div id="userReportsList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Community / Feed -->
+    <div>
+      <div class="card">
+        <h3>Community Feed</h3>
+        <div class="muted tiny">Upvote & comment to engage</div>
+        <div id="feedList" style="margin-top:12px;display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+
+      <div style="height:18px"></div>
+
+      <div class="card">
+        <h3>Quick Actions</h3>
+        <div style="margin-top:10px">
+          <button class="btn" id="myReportsBtn">Show My Reports</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal" id="detailModal">
+  <div class="modal-card">
+    <div class="modal-left">
+      <img id="detailImage" style="width:100%;border-radius:8px;height:280px;object-fit:cover">
+      <h3 id="detailTitle"></h3>
+      <div class="meta" id="detailMeta"></div>
+      <p id="detailDesc"></p>
+    </div>
+    <div class="modal-right">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="upvote" id="upvoteBtn"><i class="fa-solid fa-arrow-up"></i><span id="upvoteCount" style="font-weight:700">0</span></div>
+        <div class="muted tiny" id="viewsInfo">Views: 0</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <h4>Comments</h4>
+        <div id="commentsBox" style="max-height:260px;overflow:auto;margin-top:8px"></div>
+        <div style="margin-top:10px">
+          <input type="text" id="commentInput" placeholder="Write a comment..." style="width:100%;padding:8px;border-radius:8px;border:1px solid #ddd">
+          <button class="btn" id="commentBtn" style="margin-top:8px;width:100%">Post Comment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+
+<script>
+/* ========= Configuration =========
+ If you want to enable remote image uploads via Imgur, set IMGUR_CLIENT_ID below.
+ To get a client id: https://api.imgur.com/oauth2/addclient  (choose anonymous usage)
+ Leave empty to use localStorage data URLs (works as demo but not production).
+================================= */
+const IMGUR_CLIENT_ID = ''; // <-- optional: put your Imgur Client ID here
+const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2';
+
+const userId = localStorage.getItem('gov_user_id') || ('USER_' + Math.floor(Math.random()*9000+1000));
+localStorage.setItem('gov_user_id', userId);
+document.getElementById('currentUser').textContent = userId;
+
+let userReports = JSON.parse(localStorage.getItem('gov_user_reports') || '[]'); // user's own reports
+let allReports = JSON.parse(localStorage.getItem('gov_all_reports') || '[]'); // community feed (for demo shared)
+
+/* Utility: show toast */
+function showToast(msg='Saved') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display='block';
+  setTimeout(()=> t.style.display='none',2800);
+}
+
+/* Location: get geolocation and reverse geocode */
+async function fetchLocation() {
+  const locInput = document.getElementById('locationInput');
+  locInput.value = 'Detecting location...';
+  if (!navigator.geolocation) { locInput.value='Geolocation not supported'; return null; }
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      try {
+        const r = await fetch(`${NOMINATIM_BASE}&lat=${lat}&lon=${lon}`, { headers: { 'Accept': 'application/json' }});
+        const j = await r.json();
+        const display = j.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        locInput.value = display;
+        resolve({ display, lat, lon });
+      } catch (e) {
+        locInput.value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        resolve({ display: locInput.value, lat, lon });
+      }
+    }, (err) => {
+      locInput.value = 'Location permission denied';
+      resolve(null);
+    }, { enableHighAccuracy:true, timeout:10000 });
+  });
+}
+
+/* Image preview handler */
+const imageInput = document.getElementById('imageInput');
+const previewWrap = document.getElementById('previewWrap');
+const previewImg = document.getElementById('previewImg');
+let currentImageDataURL = null;
+imageInput.addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) { previewWrap.style.display='none'; currentImageDataURL=null; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    currentImageDataURL = reader.result;
+    previewImg.src = currentImageDataURL;
+    previewWrap.style.display = 'block';
+  };
+  reader.readAsDataURL(f);
+});
+
+/* Simple text similarity (based on word overlap) */
+function textSimilarity(a,b){
+  if(!a || !b) return 0;
+  const aWords = new Set(a.toLowerCase().split(/\W+/).filter(Boolean));
+  const bWords = new Set(b.toLowerCase().split(/\W+/).filter(Boolean));
+  if(aWords.size===0 || bWords.size===0) return 0;
+  let inter = 0;
+  for(const w of aWords) if(bWords.has(w)) inter++;
+  const union = new Set([...aWords,...bWords]).size;
+  return inter/union;
+}
+
+/* Duplicate detection: checks exact image dataURL match OR same category + nearby location OR description similarity */
+function detectDuplicate(newReport){
+  // exact image match
+  for(const r of allReports){
+    if(newReport.image && r.image && newReport.image === r.image){
+      return { type:'image', report:r };
+    }
+  }
+  // nearby same category
+  if(newReport.lat && newReport.lon){
+    for(const r of allReports){
+      if(r.category === newReport.category && r.lat && r.lon){
+        const dLat = Math.abs(r.lat - newReport.lat);
+        const dLon = Math.abs(r.lon - newReport.lon);
+        if(dLat < 0.0015 && dLon < 0.0015) return { type:'nearby', report:r };
+      }
+    }
+  }
+  // description similarity
+  for(const r of allReports){
+    const sim = textSimilarity(newReport.description, r.description);
+    if(sim > 0.6) return { type:'text', report:r, score:sim };
+  }
+  return null;
+}
+
+/* Upload image (Imgur if key provided, else return dataURL) */
+async function uploadImage(dataURL){
+  if(!dataURL) return '';
+  if(IMGUR_CLIENT_ID){
+    try {
+      // convert dataURL to base64 without header
+      const base64 = dataURL.split(',')[1];
+      const res = await fetch('https://api.imgur.com/3/image', {
+        method:'POST',
+        headers: { Authorization: `Client-ID ${IMGUR_CLIENT_ID}`, Accept: 'application/json' },
+        body: new URLSearchParams({ image: base64 })
+      });
+      const j = await res.json();
+      if(j && j.data && j.data.link) return j.data.link;
+      return dataURL; // fallback
+    } catch(err){
+      return dataURL;
+    }
+  } else {
+    // fallback: use dataURL (stored locally)
+    return dataURL;
+  }
+}
+
+/* Submit new report */
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const category = document.getElementById('categoryInput').value;
+  const description = document.getElementById('descInput').value.trim();
+  const locStr = document.getElementById('locationInput').value.trim();
+  if(!description){ alert('Please provide a short description'); return; }
+
+  // get coords if available (try geolocation again if not set)
+  let coords = null;
+  if(locStr === '' || locStr === 'Fetching location...' || locStr === 'Detecting location...'){
+    coords = await fetchLocation();
+  } else {
+    // do nothing; we may not have lat/lon
+  }
+
+  const lat = coords?.lat || null;
+  const lon = coords?.lon || null;
+
+  showToast('Uploading image (if any)...');
+
+  const imageUrl = await uploadImage(currentImageDataURL);
+
+  const newReport = {
+    id: 'R' + Date.now(),
+    userId,
+    userName: 'You',
+    category,
+    description,
+    image: imageUrl || '',
+    location: locStr || (coords?.display || ''),
+    lat: lat, lon: lon,
+    date: new Date().toISOString().slice(0,10),
+    time: new Date().toLocaleTimeString(),
+    status: 'submitted',
+    upvotes: 0,
+    comments: [],
+    views: 0
+  };
+
+  // duplicate detection
+  const dup = detectDuplicate(newReport);
+  if(dup){
+    const msg = dup.type === 'image' ? 'This image appears to match an existing report.' :
+                dup.type === 'nearby' ? 'A similar report was already posted nearby.' :
+                `A similar report exists (text similarity ${(dup.score||0).toFixed(2)})`;
+    if(!confirm(msg + '\nDo you still want to submit?')) {
+      return;
+    }
+  }
+
+  // save to storage (both user and community feed)
+  userReports.unshift(newReport);
+  allReports.unshift(newReport);
+  localStorage.setItem('gov_user_reports', JSON.stringify(userReports));
+  localStorage.setItem('gov_all_reports', JSON.stringify(allReports));
+
+  // clear form
+  document.getElementById('descInput').value='';
+  document.getElementById('imageInput').value='';
+  currentImageDataURL = null;
+  previewWrap.style.display='none';
+
+  renderUserReports();
+  renderFeed();
+  showToast('Report submitted');
+});
+
+/* get location button */
+document.getElementById('getLocBtn').addEventListener('click', async ()=>{
+  await fetchLocation();
+});
+
+/* render user's reports (tabs) */
+function renderUserReports(active='submitted'){
+  const list = document.getElementById('userReportsList');
+  list.innerHTML = '';
+  // filter by status
+  const rows = userReports.filter(r => {
+    if(active==='submitted') return r.status === 'submitted';
+    if(active==='inprogress') return r.status === 'in_progress';
+    if(active==='resolved') return r.status === 'resolved';
+    if(active==='history') return r.status !== 'submitted' && r.status !== 'in_progress' && r.status !== 'resolved';
+    return true;
+  });
+  if(rows.length === 0) { list.innerHTML = '<div class="muted tiny">No reports</div>'; return; }
+  rows.forEach(r => {
+    const el = document.createElement('div');
+    el.className = 'report-row card';
+    el.innerHTML = `
+      <div class="center">${r.id.split('').slice(-4).join('')}</div>
+      <div class="tiny">${r.userId}</div>
+      <div><span class="problem">${r.category}</span><div class="muted tiny">${r.description.slice(0,80)}${r.description.length>80? '...':''}</div></div>
+      <div><div class="tiny">${r.date}</div><div class="muted tiny">${r.time}</div></div>
+      <div class="center">
+        ${r.priorityIcon || ''}
+      </div>
+    `;
+    // status representation in background via small pill (append)
+    const statusEl = document.createElement('div');
+    statusEl.className = 'tiny';
+    const statusSpan = document.createElement('div');
+    statusSpan.className = 'status-pill';
+    if(r.status === 'submitted') statusSpan.className += ' status-submitted';
+    if(r.status === 'in_progress') statusSpan.className += ' status-progress';
+    if(r.status === 'resolved') statusSpan.className += ' status-resolved';
+    statusSpan.textContent = r.status.replace('_',' ').toUpperCase();
+    // place below date
+    el.querySelector('div:nth-child(4)').appendChild(statusSpan);
+
+    el.querySelector('.problem').addEventListener('click', ()=> openDetail(r));
+    list.appendChild(el);
+  });
+}
+
+/* community feed */
+function renderFeed(){
+  const feed = document.getElementById('feedList');
+  feed.innerHTML = '';
+  if(allReports.length===0) { feed.innerHTML = '<div class="muted tiny">No community reports yet</div>'; return; }
+  // show top 6
+  allReports.slice(0,8).forEach(r=>{
+    const box = document.createElement('div');
+    box.className = 'report-row';
+    box.style.gridTemplateColumns='56px 1fr 80px';
+    box.innerHTML = `
+      <img src="${r.image||'https://picsum.photos/80/60?random='+Math.floor(Math.random()*1000)}" style="width:56px;height:44px;object-fit:cover;border-radius:6px">
+      <div>
+        <div style="font-weight:700">${r.category} <span class="tiny muted">by ${r.userId}</span></div>
+        <div class="muted tiny">${r.description.slice(0,70)}${r.description.length>70?'...':''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+        <div class="muted tiny">${r.date}</div>
+        <div style="display:flex;gap:8px">
+          <div class="upvote" style="font-size:13px" data-id="${r.id}"><i class="fa-solid fa-arrow-up"></i>&nbsp;<span>${r.upvotes||0}</span></div>
+          <div class="muted tiny">${(r.comments||[]).length}💬</div>
+        </div>
+      </div>
+    `;
+    // upvote handler
+    box.querySelector('.upvote').addEventListener('click', ()=>{
+      handleUpvote(r.id);
+      renderFeed(); renderUserReports(getActiveTab());
+    });
+    // click whole box opens detail
+    box.addEventListener('click', (e)=>{ if(!e.target.closest('.upvote')) openDetail(r); });
+    feed.appendChild(box);
+  });
+}
+
+/* upvote logic: prevent multiple upvotes per user using localStorage */
+function handleUpvote(reportId){
+  const voted = JSON.parse(localStorage.getItem('gov_voted')||'[]');
+  if(voted.includes(reportId)){
+    alert('You already upvoted this report.');
+    return;
+  }
+  const idx = allReports.findIndex(r => r.id === reportId);
+  if(idx>=0){ allReports[idx].upvotes = (allReports[idx].upvotes||0)+1; localStorage.setItem('gov_all_reports', JSON.stringify(allReports)); voted.push(reportId); localStorage.setItem('gov_voted', JSON.stringify(voted)); showToast('Upvoted'); }
+}
+
+/* open detail modal */
+function openDetail(report){
+  // increment views
+  const idx = allReports.findIndex(r => r.id === report.id);
+  if(idx>=0){ allReports[idx].views = (allReports[idx].views||0)+1; localStorage.setItem('gov_all_reports', JSON.stringify(allReports)); }
+  // fill modal
+  document.getElementById('detailImage').src = report.image || 'https://picsum.photos/720/380?random=' + Math.floor(Math.random()*1000);
+  document.getElementById('detailTitle').textContent = `${report.category} — ${report.id}`;
+  document.getElementById('detailMeta').innerHTML = `<div class="muted tiny">By ${report.userId} • ${report.date} ${report.time}</div><div class="meta">Location: ${report.location || '—'}</div>`;
+  document.getElementById('detailDesc').textContent = report.description;
+  document.getElementById('upvoteCount').textContent = report.upvotes||0;
+  document.getElementById('viewsInfo').textContent = 'Views: ' + (report.views||0);
+
+  // comments
+  renderComments(report);
+
+  // upvote in modal
+  document.getElementById('upvoteBtn').onclick = () => { handleUpvote(report.id); document.getElementById('upvoteCount').textContent = (report.upvotes||0)+1; renderFeed(); renderUserReports(getActiveTab()); };
+
+  // comment post
+  document.getElementById('commentBtn').onclick = () => {
+    const v = document.getElementById('commentInput').value.trim();
+    if(!v) return alert('Enter comment');
+    const newComment = { who: userId, text: v, when: new Date().toLocaleString() };
+    // add to allReports and userReports if present
+    const i = allReports.findIndex(rr=>rr.id===report.id);
+    if(i>=0){ allReports[i].comments = allReports[i].comments || []; allReports[i].comments.push(newComment); localStorage.setItem('gov_all_reports', JSON.stringify(allReports)); }
+    // also update userReports list if owner
+    const j = userReports.findIndex(rr=>rr.id===report.id);
+    if(j>=0){ userReports[j].comments = userReports[j].comments || []; userReports[j].comments.push(newComment); localStorage.setItem('gov_user_reports', JSON.stringify(userReports)); }
+    document.getElementById('commentInput').value='';
+    renderComments(allReports[i] || report);
+    renderFeed();
+  };
+
+  // show
+  document.getElementById('detailModal').classList.add('active');
+}
+
+/* render comments */
+function renderComments(report){
+  const box = document.getElementById('commentsBox');
+  box.innerHTML = '';
+  (report.comments||[]).slice().reverse().forEach(c=>{
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.innerHTML = `<div class="who">${c.who} <span class="tiny muted">• ${c.when}</span></div><div>${c.text}</div>`;
+    box.appendChild(div);
+  });
+}
+
+/* tabs */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=> {
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    renderUserReports(t.dataset.tab);
+  });
+});
+
+/* helper to read active tab */
+function getActiveTab(){
+  const t = document.querySelector('.tab.active');
+  return t ? t.dataset.tab : 'submitted';
+}
+
+/* modal close */
+closeModal.addEventListener('click', ()=> document.getElementById('detailModal').classList.remove('active'));
+window.addEventListener('click', e=>{ if(e.target.id === 'detailModal') document.getElementById('detailModal').classList.remove('active'); });
+
+/* initial render */
+function enhanceReports(){
+  // add quick priorityIcon based on priority (if not set)
+  for(const r of allReports){
+    if(!r.priorityIcon){
+      if(r.priority==='high') r.priorityIcon = '<i class="fa-solid fa-triangle-exclamation high"></i>';
+      else if(r.priority==='medium') r.priorityIcon = '<i class="fa-solid fa-circle-exclamation medium"></i>';
+      else r.priorityIcon = '<i class="fa-solid fa-circle-info low"></i>';
+    }
+  }
+  localStorage.setItem('gov_all_reports', JSON.stringify(allReports));
+}
+enhanceReports();
+renderFeed();
+renderUserReports();
+
+/* dark mode toggle */
+document.getElementById('darkBtn').addEventListener('click', ()=> {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('darkBtn').innerHTML = isDark ? '<i class="fa-regular fa-sun"></i>' : '<i class="fa-regular fa-moon"></i>';
+});
+
+/* quick show my reports */
+document.getElementById('myReportsBtn').addEventListener('click', ()=> {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.tab[data-tab="submitted"]').classList.add('active');
+  renderUserReports('submitted');
+  window.scrollTo({top:200,behavior:'smooth'});
+});
+
+/* allow switching to Admin (just reload placeholder) */
+document.getElementById('goAdmin').addEventListener('click', ()=>{
+  alert('Switching to Admin interface — (demo)'); // in your full app hook this to admin page
+});
+
+/* keep storage live across tabs (optional) */
+window.addEventListener('storage', (e)=>{
+  if(e.key === 'gov_all_reports' || e.key === 'gov_user_reports'){
+    allReports = JSON.parse(localStorage.getItem('gov_all_reports')||'[]');
+    userReports = JSON.parse(localStorage.getItem('gov_user_reports')||'[]');
+    renderFeed(); renderUserReports(getActiveTab());
+  }
+});
+</script>
+</body>
+</html>
