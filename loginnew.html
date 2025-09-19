@@ -35,19 +35,29 @@
                     <button class="tab-btn" id="signupTabBtn" data-tab="signup">Sign Up</button>
                 </div>
 
-                <form id="userLoginForm" class="active user-form">
-                    <h3>Login</h3>
-                    <div class="input-group">
-                        <i class="fas fa-envelope icon"></i>
-                        <input type="email" placeholder="Email" required>
-                    </div>
-                    <div class="input-group">
-                        <i class="fas fa-lock icon"></i>
-                        <input type="password" placeholder="Password" required>
-                    </div>
-                    <a href="#" class="forgot-password">Forgot Password?</a>
-                    <button type="submit" class="submit-btn">Login</button>
-                </form>
+                <form id="userLoginForm" class="active user-form" onsubmit="redirectToReport(event)">
+    <h3>Login</h3>
+    <div class="input-group">
+        <i class="fas fa-envelope icon"></i>
+        <input type="email" placeholder="Email" required>
+    </div>
+    <div class="input-group">
+        <i class="fas fa-lock icon"></i>
+        <input type="password" placeholder="Password" required>
+    </div>
+    <a href="#" class="forgot-password">Forgot Password?</a>
+    <button type="submit" class="submit-btn">Login</button>
+</form>
+
+<script>
+    // 👇 Added function to redirect after login click
+    function redirectToReport(event) {
+        event.preventDefault(); // Form ka default submit action rok diya
+        window.location.href = "after_report.html"; // Redirect to after_report.html
+    }
+</script>
+
+                
 
                 <form id="userSignupForm" class="user-form">
                     <h3>Sign Up</h3>
