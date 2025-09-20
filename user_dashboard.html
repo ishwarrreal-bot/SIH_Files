@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nivaran - User Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <style>
+      .toaster {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary);
+        color: white;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.6rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.4s, transform 0.4s;
+        z-index: 9999;
+      }
+      .toaster.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .issue-icons {
+        display: flex;
+        gap: 0.8rem;
+        font-size: 0.85rem;
+        align-items: center;
+        margin-top: 0.5rem;
+        color: var(--text);
+      }
+      .issue-icons i {
+        margin-right: 0.3rem;
+        color: var(--primary);
+      }
+
+      :root {
+        --bg: #f8fafc;
+        --text: #1e293b;
+        --card: #ffffff;
+        --primary: #2563eb;
+        --secondary: #3b82f6;
+      }
+      [data-theme="dark"] {
+        --bg: #0f172a;
+        --text: #e2e8f0;
+        --card: #1e293b;
+        --primary: #3b82f6;
+        --secondary: #60a5fa;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        transition: 0.3s;
+      }
+
+      /* HEADER */
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: var(--card);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      header h1 {
+        color: var(--primary);
+        font-size: 1.6rem;
+      }
+      .nav-buttons {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .nav-buttons button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        color: white;
+        background: var(--primary);
+        transition: 0.2s;
+      }
+      .nav-buttons button:hover {
+        background: var(--secondary);
+      }
+      .mode-toggle {
+        cursor: pointer;
+        font-size: 1.2rem;
+        margin-left: 1rem;
+      }
+
+      /* SIDEBAR */
+      .sidebar {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 220px;
+        height: calc(100% - 70px);
+        background: var(--card);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 99;
+      }
+      .sidebar .profile {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .sidebar .profile img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 0.5rem;
+      }
+      .sidebar .profile h3 {
+        font-size: 1rem;
+        color: var(--primary);
+      }
+      .sidebar .stats p {
+        margin: 0.6rem 0;
+        font-size: 0.9rem;
+      }
+      .progress-bar {
+        width: 100%;
+        height: 10px;
+        background: #e2e8f0;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+      }
+      .progress {
+        height: 100%;
+        background: var(--primary);
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+
+      /* MAIN CONTENT */
+      .main-content {
+        margin-left: 240px; /* space for sidebar */
+        padding: 2rem;
+      }
+
+      /* Citizen Stats */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      .stat-card {
+        background: var(--card);
+        padding: 1rem 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        transition: transform 0.2s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+      .stat-card h3 {
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+      .stat-card p {
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+
+      /* Issue Report Form */
+      .issue-form {
+        background: var(--card);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+      }
+      .issue-form input,
+      .issue-form textarea {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        margin: 0.5rem 0;
+        border-radius: 0.5rem;
+        border: 1px solid #ccc;
+      }
+      .issue-form button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.6rem;
+        cursor: pointer;
+      }
+      .issue-form button:hover {
+        background: var(--secondary);
+      }
+
+      /* Tables */
+      .table-container {
+        overflow-x: auto;
+        margin-bottom: 2rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card);
+        border-radius: 0.8rem;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      }
+      th,
+      td {
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+      }
+      th {
+        background: var(--primary);
+        color: white;
+      }
+      tr:hover {
+        background: rgba(59, 130, 246, 0.08);
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      img.issue-img {
+        width: 80px;
+        height: 50px;
+        border-radius: 0.4rem;
+        object-fit: cover;
+      }
+
+      /* Status badges */
+      .status {
+        padding: 0.3rem 0.6rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        color: white;
+        font-size: 0.85rem;
+      }
+      .status.pending {
+        background: #f59e0b;
+      }
+      .status.open {
+        background: #ef4444;
+      }
+      .status.resolved {
+        background: #22c55e;
+      }
+      .status.progress {
+        background: #3b82f6;
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .modal-content {
+        background: var(--card);
+        padding: 2rem;
+        border-radius: 1rem;
+        max-width: 600px;
+        width: 90%;
+        position: relative;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+      .modal-content img {
+        width: 100%;
+        border-radius: 0.6rem;
+        margin-bottom: 1rem;
+      }
+      .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: var(--text);
+      }
+      .modal button {
+        margin-top: 1rem;
+        margin-right: 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
+      .modal button:hover {
+        background: var(--secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Nivaran Dashboard</h1>
+      <div class="nav-buttons">
+        <button onclick="window.location.href='user_dashboard.html'">
+          Dashboard
+        </button>
+        <button onclick="window.location.href='myarea.html'">My Area</button>
+        <button onclick="window.location.href='leaderboard.html'">
+          Leaderboard
+        </button>
+        <button onclick="logout()">Logout</button>
+        <span class="mode-toggle" onclick="toggleTheme()">🌗</span>
+      </div>
+    </header>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="profile">
+        <img src="https://picsum.photos/80?random=10" alt="User Avatar" />
+        <h3>John Doe</h3>
+      </div>
+      <div class="stats">
+        <p>
+          <strong>Citizen Points:</strong> <span id="citizenPoints">420</span>
+        </p>
+        <p><strong>Level:</strong> <span id="citizenLevel">5</span></p>
+        <div class="progress-bar">
+          <div class="progress" style="width: 70%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- Citizen Stats -->
+      <section class="citizen-stats">
+        <h2>My Stats</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Rank</h3>
+            <p>#5</p>
+          </div>
+          <div class="stat-card">
+            <h3>Citizen Points</h3>
+            <p>420</p>
+          </div>
+          <div class="stat-card">
+            <h3>Reports Submitted</h3>
+            <p>18</p>
+          </div>
+          <div class="stat-card">
+            <h3>Verified Reports</h3>
+            <p>12</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Report Issue Form -->
+      <section class="report-issue-section">
+        <h2>Report New Issue</h2>
+        <form class="issue-form" id="reportForm">
+          <input type="text" placeholder="Issue Title" required />
+          <textarea
+            placeholder="Describe the issue..."
+            rows="4"
+            required
+          ></textarea>
+          <input type="text" placeholder="Location" required />
+          <input type="file" id="issueImage" accept="image/*" />
+          <button type="submit">Submit Issue</button>
+        </form>
+      </section>
+
+      <!-- My Reported Issues -->
+      <section class="my-reports">
+        <h2>My Reported Issues</h2>
+        <div class="table-container">
+          <table id="myReportsTable">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="openModal(0)">
+                <td>
+                  <img
+                    src="https://picsum.photos/80/50?random=1"
+                    class="issue-img"
+                  />
+                </td>
+                <td>
+                  Potholes on Main Road
+                  <div class="issue-icons">
+                    <div><i class="fas fa-user-check"></i> 3</div>
+                    <div><i class="fas fa-thumbs-up"></i> 5</div>
+                  </div>
+                </td>
+                <td><span class="status open">Open</span></td>
+                <td>MG Road Junction</td>
+                <td>Sept 17, 2025</td>
+              </tr>
+              <tr onclick="openModal(1)">
+                <td>
+                  <img
+                    src="https://picsum.photos/80/50?random=2"
+                    class="issue-img"
+                  />
+                </td>
+                <td>
+                  Overflowing Garbage Bin
+                  <div class="issue-icons">
+                    <div><i class="fas fa-user-check"></i> 2</div>
+                    <div><i class="fas fa-thumbs-up"></i> 4</div>
+                  </div>
+                </td>
+                <td><span class="status pending">Pending</span></td>
+                <td>Sector 12</td>
+                <td>Sept 12, 2025</td>
+              </tr>
+              <tr onclick="openModal(2)">
+                <td>
+                  <img
+                    src="https://picsum.photos/80/50?random=3"
+                    class="issue-img"
+                  />
+                </td>
+                <td>
+                  Broken Streetlight
+                  <div class="issue-icons">
+                    <div><i class="fas fa-user-check"></i> 5</div>
+                    <div><i class="fas fa-thumbs-up"></i> 6</div>
+                  </div>
+                </td>
+                <td><span class="status progress">In Progress</span></td>
+                <td>Green Park Colony</td>
+                <td>Sept 15, 2025</td>
+              </tr>
+              <tr onclick="openModal(3)">
+                <td>
+                  <img
+                    src="https://picsum.photos/80/50?random=4"
+                    class="issue-img"
+                  />
+                </td>
+                <td>
+                  Water Leakage
+                  <div class="issue-icons">
+                    <div><i class="fas fa-user-check"></i> 1</div>
+                    <div><i class="fas fa-thumbs-up"></i> 3</div>
+                  </div>
+                </td>
+                <td><span class="status pending">Pending</span></td>
+                <td>Lakeview Street</td>
+                <td>Sept 14, 2025</td>
+              </tr>
+              <tr onclick="openModal(4)">
+                <td>
+                  <img
+                    src="https://picsum.photos/80/50?random=5"
+                    class="issue-img"
+                  />
+                </td>
+                <td>
+                  Illegal Parking
+                  <div class="issue-icons">
+                    <div><i class="fas fa-user-check"></i> 4</div>
+                    <div><i class="fas fa-thumbs-up"></i> 2</div>
+                  </div>
+                </td>
+                <td><span class="status open">Open</span></td>
+                <td>Main Square</td>
+                <td>Sept 10, 2025</td>
+              </tr>
+              <tr onclick="openModal(5)">
+                <td>
+                  <img
+                    src="https://picsum.photos/80/50?random=6"
+                    class="issue-img"
+                  />
+                </td>
+                <td>
+                  Damaged Playground
+                  <div class="issue-icons">
+                    <div><i class="fas fa-user-check"></i> 3</div>
+                    <div><i class="fas fa-thumbs-up"></i> 5</div>
+                  </div>
+                </td>
+                <td><span class="status progress">In Progress</span></td>
+                <td>Central Park</td>
+                <td>Sept 11, 2025</td>
+              </tr>
+              <tr onclick="openModal(6)">
+                <td>
+                  <img
+                    src="https://picsum.photos/80/50?random=7"
+                    class="issue-img"
+                  />
+                </td>
+                <td>
+                  Street Sign Missing
+                  <div class="issue-icons">
+                    <div><i class="fas fa-user-check"></i> 2</div>
+                    <div><i class="fas fa-thumbs-up"></i> 4</div>
+                  </div>
+                </td>
+                <td><span class="status resolved">Resolved</span></td>
+                <td>Oak Avenue</td>
+                <td>Sept 9, 2025</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ISSUE DETAILS MODAL -->
+    <div id="issueModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img id="modalImage" src="" alt="Issue Image" />
+        <h3 id="modalTitle">Issue Title</h3>
+        <p id="modalDescription">Detailed description of the issue...</p>
+        <p><strong>Status:</strong> <span id="modalStatus">Open</span></p>
+        <p><strong>Location:</strong> <span id="modalLocation">Area</span></p>
+        <p><strong>Date:</strong> <span id="modalDate">Sept 17, 2025</span></p>
+        <button onclick="verifyIssue()">Verify Issue</button>
+        <button onclick="votePriority()">Vote Priority</button>
+      </div>
+    </div>
+
+    <div id="toaster" class="toaster"></div>
+
+    <script>
+      const issuesData = [
+        {
+          image: "https://picsum.photos/400/250?random=1",
+          title: "Potholes on Main Road",
+          description: "Deep potholes causing traffic disruptions.",
+          status: "Open",
+          location: "MG Road Junction",
+          date: "Sept 17, 2025",
+        },
+        {
+          image: "https://picsum.photos/400/250?random=2",
+          title: "Overflowing Garbage Bin",
+          description:
+            "Garbage bin not cleared for 3 days, causing foul smell.",
+          status: "Pending",
+          location: "Sector 12",
+          date: "Sept 12, 2025",
+        },
+        {
+          image: "https://picsum.photos/400/250?random=3",
+          title: "Broken Streetlight",
+          description: "Streetlight not working, area dark at night.",
+          status: "In Progress",
+          location: "Green Park Colony",
+          date: "Sept 15, 2025",
+        },
+        {
+          image: "https://picsum.photos/400/250?random=4",
+          title: "Water Leakage",
+          description: "Pipe leak causing water pooling on the street.",
+          status: "Pending",
+          location: "Lakeview Street",
+          date: "Sept 14, 2025",
+        },
+        {
+          image: "https://picsum.photos/400/250?random=5",
+          title: "Illegal Parking",
+          description: "Cars parked illegally, blocking traffic.",
+          status: "Open",
+          location: "Main Square",
+          date: "Sept 10, 2025",
+        },
+        {
+          image: "https://picsum.photos/400/250?random=6",
+          title: "Damaged Playground",
+          description: "Playground equipment broken, unsafe for kids.",
+          status: "In Progress",
+          location: "Central Park",
+          date: "Sept 11, 2025",
+        },
+        {
+          image: "https://picsum.photos/400/250?random=7",
+          title: "Street Sign Missing",
+          description: "Important street sign missing, causing confusion.",
+          status: "Resolved",
+          location: "Oak Avenue",
+          date: "Sept 9, 2025",
+        },
+      ];
+
+      // MODAL HANDLERS
+      function openModal(index) {
+        const issue = issuesData[index];
+        document.getElementById("modalImage").src = issue.image;
+        document.getElementById("modalTitle").textContent = issue.title;
+        document.getElementById("modalDescription").textContent =
+          issue.description;
+        document.getElementById("modalStatus").textContent = issue.status;
+        document.getElementById("modalLocation").textContent = issue.location;
+        document.getElementById("modalDate").textContent = issue.date;
+        document.getElementById("issueModal").style.display = "flex";
+      }
+      function closeModal() {
+        document.getElementById("issueModal").style.display = "none";
+      }
+
+      // VERIFY & VOTE (dummy functions)
+      function verifyIssue() {
+        alert("You have verified this issue.");
+      }
+      function votePriority() {
+        alert("You voted to increase priority of this issue.");
+      }
+
+      // REPORT FORM SUBMIT
+      document
+        .getElementById("reportForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          alert("Issue reported successfully!");
+          this.reset();
+        });
+
+      // LOGOUT
+      function logout() {
+        window.location.href = "portal.html";
+      }
+
+      // DARK/LIGHT TOGGLE
+      function toggleTheme() {
+        const html = document.documentElement;
+        if (html.getAttribute("data-theme") === "dark")
+          html.removeAttribute("data-theme");
+        else html.setAttribute("data-theme", "dark");
+      }
+
+      // Dummy progress update
+      let points = 420;
+      document.getElementById("citizenPoints").textContent = points;
+      document.getElementById("citizenLevel").textContent = Math.floor(
+        points / 100
+      );
+      document.querySelector(".progress").style.width = (points % 100) + "%";
+
+      function showToaster(message) {
+        const toaster = document.getElementById("toaster");
+        toaster.textContent = message;
+        toaster.classList.add("show");
+        setTimeout(() => {
+          toaster.classList.remove("show");
+        }, 2000);
+      }
+
+      // Modify verify & vote functions
+      function verifyIssue() {
+        showToaster("Issue verified! ✅");
+      }
+
+      function votePriority() {
+        showToaster("Priority increased! 👍");
+      }
+    </script>
+  </body>
+</html>

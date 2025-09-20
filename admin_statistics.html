@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics & Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --primary-color: #007bff;
+        --bg-light: #f5f8ff;
+        --bg-dark: #1e1e2f;
+        --card-light: #ffffff;
+        --card-dark: #2c2c3e;
+        --text-light: #000;
+        --text-dark: #fff;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: var(--bg-light);
+        color: var(--text-light);
+        transition: 0.3s;
+      }
+      body.dark-mode {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+      }
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 220px;
+        height: 100vh;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        padding-top: 20px;
+      }
+      .sidebar h2 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .sidebar a {
+        padding: 15px 20px;
+        color: white;
+        text-decoration: none;
+        transition: 0.2s;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+      }
+      /* Main */
+      .main {
+        margin-left: 220px;
+        padding: 20px;
+        flex: 1;
+      }
+      /* Cards */
+      .cards {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+      }
+      .card {
+        flex: 1;
+        min-width: 150px;
+        background-color: var(--card-light);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: 0.3s;
+      }
+      body.dark-mode .card {
+        background-color: var(--card-dark);
+      }
+      .card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+      }
+      .card p {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+      /* Charts */
+      .chart-container {
+        margin-bottom: 40px;
+        background: var(--card-light);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 800px; /* max width */
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .chart-container canvas {
+        height: 300px !important; /* set relevant height */
+      }
+      body.dark-mode .chart-container {
+        background: var(--card-dark);
+      }
+      canvas {
+        max-width: 100%;
+      }
+      .theme-toggle {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        padding: 8px 12px;
+        cursor: pointer;
+        background-color: white;
+        color: var(--primary-color);
+        border: none;
+        border-radius: 4px;
+      }
+      body.dark-mode .theme-toggle {
+        background-color: var(--primary-color);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2>Admin</h2>
+      <a href="admin_dashboard.html">Dashboard</a>
+  <a href="admin_reports.html">Reports</a>
+  <a href="admin_department.html">Workers / Departments</a>
+  <a href="admin_statistics.html">Analytics / Statistics</a>
+  <a href="admin_settings.html">Settings / Profile</a>
+  <a href="portal.html#admin-login">Logout</a>
+    </div>
+
+    <div class="main">
+      <!-- Quick Stats Cards -->
+      <div class="cards">
+        <div class="card">
+          <h3>Total Issues Resolved</h3>
+          <p id="totalResolved">0</p>
+        </div>
+        <div class="card">
+          <h3>Pending Issues</h3>
+          <p id="pendingIssues">0</p>
+        </div>
+        <div class="card">
+          <h3>Total Users</h3>
+          <p id="totalUsers">0</p>
+        </div>
+        <div class="card">
+          <h3>User Satisfaction %</h3>
+          <p id="userSatisfaction">0%</p>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="chart-container">
+        <h3>Monthly Issues Resolved</h3>
+        <canvas id="monthlyChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>All-Time Issues Per Department</h3>
+        <canvas id="departmentChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Department Performance Comparison</h3>
+        <canvas id="deptCompareChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>User Satisfaction</h3>
+        <canvas id="satisfactionChart"></canvas>
+      </div>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()">
+      Dark/Light Mode
+    </button>
+
+    <script>
+      // Dummy Stats
+      const stats = {
+        totalResolved: 320,
+        pending: 45,
+        totalUsers: 1500,
+        satisfaction: 88, // %
+        monthlyResolved: [20, 25, 30, 28, 35, 40, 38, 45, 50, 42, 35, 32], // Jan-Dec
+        departments: ["Roads", "Electricity", "Sanitation", "Water", "Parks"],
+        deptResolved: [120, 80, 60, 30, 30],
+        deptComparison: [120, 80, 60, 30, 30],
+        satisfactionSplit: [88, 7, 5], // satisfied, neutral, dissatisfied
+      };
+
+      // Populate Quick Stats
+      document.getElementById("totalResolved").innerText = stats.totalResolved;
+      document.getElementById("pendingIssues").innerText = stats.pending;
+      document.getElementById("totalUsers").innerText = stats.totalUsers;
+      document.getElementById("userSatisfaction").innerText =
+        stats.satisfaction + "%";
+
+      // Monthly Line Chart
+      new Chart(document.getElementById("monthlyChart"), {
+        type: "line",
+        data: {
+          labels: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ],
+          datasets: [
+            {
+              label: "Issues Resolved",
+              data: stats.monthlyResolved,
+              borderColor: "#007bff",
+              backgroundColor: "rgba(0,123,255,0.2)",
+              fill: true,
+              tension: 0.3,
+            },
+          ],
+        },
+        options: { responsive: true, plugins: { legend: { display: true } } },
+      });
+
+      // Department Bar Chart
+      new Chart(document.getElementById("departmentChart"), {
+        type: "bar",
+        data: {
+          labels: stats.departments,
+          datasets: [
+            {
+              label: "Resolved Issues",
+              data: stats.deptResolved,
+              backgroundColor: "#007bff",
+            },
+          ],
+        },
+        options: { responsive: true, plugins: { legend: { display: true } } },
+      });
+
+      // Department Comparison Horizontal Bar
+      new Chart(document.getElementById("deptCompareChart"), {
+        type: "bar",
+        data: {
+          labels: stats.departments,
+          datasets: [
+            {
+              label: "Performance Score",
+              data: stats.deptComparison,
+              backgroundColor: [
+                "#007bff",
+                "#28a745",
+                "#ffc107",
+                "#dc3545",
+                "#6f42c1",
+              ],
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: true } },
+        },
+      });
+
+      // User Satisfaction Pie Chart
+      new Chart(document.getElementById("satisfactionChart"), {
+        type: "pie",
+        data: {
+          labels: ["Satisfied", "Neutral", "Dissatisfied"],
+          datasets: [
+            {
+              data: stats.satisfactionSplit,
+              backgroundColor: ["#28a745", "#ffc107", "#dc3545"],
+            },
+          ],
+        },
+        options: { responsive: true },
+      });
+
+      // Dark/Light Toggle
+      function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+      }
+    </script>
+  </body>
+</html>
