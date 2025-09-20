@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workers / Departments</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+<style>
+:root {
+  --primary-color: #007bff;
+  --bg-light: #f5f8ff;
+  --bg-dark: #1e1e2f;
+  --card-light: #ffffff;
+  --card-dark: #2c2c3e;
+  --text-light: #000;
+  --text-dark: #fff;
+  --available-color: #52c41a;
+  --busy-color: #faad14;
+  --offline-color: #ff4d4f;
+  --task-high: #ff4d4f;
+  --task-medium: #faad14;
+  --task-low: #52c41a;
+}
+
+/* Body */
+body { margin:0; font-family:'Segoe UI',sans-serif; display:flex; background-color: var(--bg-light); color: var(--text-light); transition:0.3s; }
+body.dark-mode { background-color: var(--bg-dark); color: var(--text-dark); }
+
+/* Sidebar */
+.sidebar {
+  position:fixed; top:0; left:0; width:220px; height:100vh;
+  background-color: var(--primary-color); color:white; display:flex; flex-direction:column; padding-top:20px;
+}
+.sidebar h2 { text-align:center; margin-bottom:30px; }
+.sidebar a { padding:15px 20px; color:white; text-decoration:none; transition:0.2s; }
+.sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.2); cursor:pointer; }
+
+/* Main */
+.main { margin-left:220px; padding:20px; flex:1; overflow-y:auto; }
+
+/* Filters */
+.filters { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.filters select, .filters input { padding:6px 12px; border-radius:6px; border:1px solid #ccc; cursor:pointer; }
+.filters select:focus, .filters input:focus { outline:none; border-color:#007bff; box-shadow:0 0 5px rgba(0,123,255,0.3); }
+
+/* Cards */
+.cards { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px; }
+.card { flex:1; min-width:150px; background-color: var(--card-light); padding:20px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1); transition:0.3s; cursor:pointer; text-align:center; }
+body.dark-mode .card { background-color: var(--card-dark); }
+.card:hover { transform:translateY(-3px); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+.card h3 { margin:0 0 10px 0; font-size:1rem; }
+.card p { margin:0; font-size:1.5rem; font-weight:bold; }
+
+/* Tables */
+.table-container { overflow-x:auto; margin-bottom:30px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:12px 15px; text-align:left; border-bottom:1px solid #ddd; }
+th { background-color: var(--primary-color); color:white; }
+body.dark-mode th { background-color: #0056b3; }
+.status-badge { padding:4px 8px; border-radius:6px; color:white; font-weight:bold; }
+.available { background-color: var(--available-color); }
+.busy { background-color: var(--busy-color); }
+.offline { background-color: var(--offline-color); }
+
+/* Task Badges */
+.task-badge { padding:3px 6px; border-radius:5px; font-weight:bold; margin-right:3px; font-size:0.85rem; cursor:pointer; display:inline-block; transition:0.3s; color:white; }
+.task-badge.high { background-color: var(--task-high); }
+.task-badge.medium { background-color: var(--task-medium); }
+.task-badge.low { background-color: var(--task-low); }
+.task-badge:hover { opacity:0.8; }
+
+/* Modal */
+.modal {
+  position:fixed; top:-100%; left:50%; transform:translateX(-50%);
+  width:400px; max-width:90%; background-color: var(--card-light); color: var(--text-light);
+  padding:20px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.3); transition:0.5s; z-index:1000;
+}
+body.dark-mode .modal { background-color: var(--card-dark); }
+.modal.active { top:80px; }
+.modal-close { float:right; cursor:pointer; font-size:18px; }
+.modal h3 { margin-top:0; }
+
+/* Dark/Light Toggle */
+.theme-toggle {
+  position:fixed; bottom:20px; left:20px; padding:8px 12px; cursor:pointer;
+  background-color:white; color:var(--primary-color); border:none; border-radius:4px;
+}
+body.dark-mode .theme-toggle { background-color:var(--primary-color); color:white; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Admin</h2>
+  <a href="admin_dashboard.html">Dashboard</a>
+  <a href="admin_reports.html">Reports</a>
+  <a href="admin_department.html">Workers / Departments</a>
+  <a href="admin_statistics.html">Analytics / Statistics</a>
+  <a href="admin_settings.html">Settings / Profile</a>
+  <a href="portal.html#admin-login">Logout</a>
+</div>
+
+<div class="main">
+
+  <!-- Quick Stats Cards -->
+  <div class="cards">
+    <div class="card"><h3>Total Workers</h3><p id="totalWorkers">0</p></div>
+    <div class="card"><h3>Total Departments</h3><p id="totalDepts">0</p></div>
+    <div class="card"><h3>Total Tasks</h3><p id="totalTasks">0</p></div>
+    <div class="card"><h3>Active Tasks</h3><p id="activeTasks">0</p></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <select id="filterDept">
+      <option value="">All Departments</option>
+      <option>Roads</option>
+      <option>Electricity</option>
+      <option>Sanitation</option>
+    </select>
+    <input type="text" id="searchWorker" placeholder="Search Worker...">
+  </div>
+
+  <!-- Workers Table -->
+  <h3>Workers</h3>
+  <div class="table-container">
+    <table id="workersTable">
+      <thead>
+        <tr>
+          <th>Worker</th>
+          <th>Department</th>
+          <th>Assigned Tasks</th>
+          <th>Tasks In Progress</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Departments Table -->
+  <h3>Departments Overview</h3>
+  <div class="table-container">
+    <table id="departmentsTable">
+      <thead>
+        <tr>
+          <th>Department</th>
+          <th>Total Tasks</th>
+          <th>Tasks In Progress</th>
+          <th>Completed Tasks</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Recently Completed Tasks -->
+  <h3>Recently Completed Tasks</h3>
+  <div class="table-container">
+    <table id="recentTasksTable">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Worker</th>
+          <th>Department</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Task Modal -->
+<div class="modal" id="taskModal">
+  <span class="modal-close" onclick="closeModal()">✖</span>
+  <h3 id="modalTaskTitle"></h3>
+  <p><strong>Worker:</strong> <span id="modalTaskWorker"></span></p>
+  <p><strong>Department:</strong> <span id="modalTaskDept"></span></p>
+  <p><strong>Status:</strong> <span id="modalTaskStatus"></span></p>
+  <p><strong>Priority:</strong> <span id="modalTaskPriority"></span></p>
+  <p><strong>Description:</strong> <span id="modalTaskDesc"></span></p>
+</div>
+
+<button class="theme-toggle" onclick="toggleTheme()">Dark/Light Mode</button>
+
+<script>
+// Dummy Data
+const workers = [
+  {name:"Worker A", dept:"Roads", assigned:[{name:"Pothole Fix", priority:"High", desc:"Fix pothole at intersection"}], inProgress:[{name:"Traffic Signal Repair", priority:"Medium", desc:"Repair traffic signal"}], status:"Available"},
+  {name:"Worker B", dept:"Electricity", assigned:[{name:"Street Light Repair", priority:"High", desc:"Repair street light near park"}], inProgress:[], status:"Busy"},
+  {name:"Worker C", dept:"Sanitation", assigned:[{name:"Garbage Collection", priority:"Low", desc:"Collect garbage in downtown"}], inProgress:[], status:"Available"},
+  {name:"Worker D", dept:"Roads", assigned:[{name:"Drain Cleaning", priority:"Medium", desc:"Clean drainage"}], inProgress:[{name:"Road Marking", priority:"Low", desc:"Mark lanes"}], status:"Busy"},
+];
+
+const departments = [
+  {name:"Roads", total:10, inProgress:3, completed:7},
+  {name:"Electricity", total:5, inProgress:2, completed:3},
+  {name:"Sanitation", total:8, inProgress:1, completed:7},
+];
+
+const recentTasks = [
+  {task:"Graffiti Removal", worker:"Worker C", dept:"Sanitation", priority:"Low"},
+  {task:"Street Light Fix", worker:"Worker B", dept:"Electricity", priority:"High"},
+  {task:"Pothole Patch", worker:"Worker A", dept:"Roads", priority:"High"},
+];
+
+// Populate Quick Stats
+document.getElementById("totalWorkers").innerText = workers.length;
+document.getElementById("totalDepts").innerText = departments.length;
+document.getElementById("totalTasks").innerText = workers.reduce((sum,w)=>sum + w.assigned.length + w.inProgress.length,0);
+document.getElementById("activeTasks").innerText = workers.reduce((sum,w)=>sum + w.inProgress.length,0);
+
+// Populate Workers Table
+function populateWorkers(filterDept="", search=""){
+  const tbody = document.getElementById("workersTable").querySelector("tbody");
+  tbody.innerHTML="";
+  workers.filter(w=> (filterDept==="" || w.dept===filterDept) && (search==="" || w.name.toLowerCase().includes(search.toLowerCase())) )
+  .forEach(w=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${w.name}</td>
+      <td>${w.dept}</td>
+      <td>${w.assigned.map(t=>`<span class="task-badge ${getTaskClass(t.priority)}" onclick="openModal('${w.name}','assigned','${t.name}')">${t.name}</span>`).join('')}</td>
+      <td>${w.inProgress.map(t=>`<span class="task-badge ${getTaskClass(t.priority)}" onclick="openModal('${w.name}','inProgress','${t.name}')">${t.name}</span>`).join('')}</td>
+      <td><span class="status-badge ${w.status.toLowerCase()}">${w.status}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Populate Departments Table
+function populateDepartments(){
+  const tbody = document.getElementById("departmentsTable").querySelector("tbody");
+  tbody.innerHTML="";
+  departments.forEach(d=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${d.name}</td>
+      <td>${d.total}</td>
+      <td>${d.inProgress}</td>
+      <td>${d.completed}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Populate Recently Completed Tasks
+function populateRecentTasks(){
+  const tbody = document.getElementById("recentTasksTable").querySelector("tbody");
+  tbody.innerHTML="";
+  recentTasks.forEach(t=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${t.task}</td>
+      <td>${t.worker}</td>
+      <td>${t.dept}</td>
+      <td><span class="task-badge ${getTaskClass(t.priority)}">${t.priority}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Task Badge Color
+function getTaskClass(priority){
+  if(priority==="High") return "high";
+  if(priority==="Medium") return "medium";
+  return "low";
+}
+
+// Modal Functions
+function openModal(workerName, type, taskName){
+  const worker = workers.find(w=>w.name===workerName);
+  const task = worker[type].find(t=>t.name===taskName);
+  document.getElementById("modalTaskTitle").innerText = task.name;
+  document.getElementById("modalTaskWorker").innerText = worker.name;
+  document.getElementById("modalTaskDept").innerText = worker.dept;
+  document.getElementById("modalTaskStatus").innerText = type==="inProgress"?"In Progress":"Assigned";
+  document.getElementById("modalTaskPriority").innerText = task.priority;
+  document.getElementById("modalTaskDesc").innerText = task.desc;
+  document.getElementById("taskModal").classList.add("active");
+}
+function closeModal(){ document.getElementById("taskModal").classList.remove("active"); }
+
+// Filters
+document.getElementById("filterDept").addEventListener("change", e=>{
+  populateWorkers(e.target.value, document.getElementById("searchWorker").value);
+});
+document.getElementById("searchWorker").addEventListener("input", e=>{
+  populateWorkers(document.getElementById("filterDept").value, e.target.value);
+});
+
+// Dark/Light toggle
+function toggleTheme(){ document.body.classList.toggle('dark-mode'); }
+
+// Initial Load
+populateWorkers();
+populateDepartments();
+populateRecentTasks();
+</script>
+
+</body>
+</html>

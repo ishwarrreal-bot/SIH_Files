@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nivaran - My Area</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --text: #1e293b;
+        --card: #ffffff;
+        --primary: #2563eb;
+        --secondary: #3b82f6;
+        --status-inprogress: #00235d;
+        --status-assigned: #d97706;
+        --status-resolved: #22c55e;
+        --status-na: #6b7280;
+      }
+
+      [data-theme="dark"] {
+        --bg: #0f172a;
+        --text: #e2e8f0;
+        --card: #1e293b;
+        --primary: #3b82f6;
+        --secondary: #60a5fa;
+        --status-inprogress: #60a5fa;
+        --status-assigned: #facc15;
+        --status-resolved: #22c55e;
+        --status-na: #9ca3af;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        transition: 0.3s;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: var(--card);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      header h1 {
+        color: var(--primary);
+        font-size: 1.6rem;
+      }
+      .nav-buttons {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .nav-buttons button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 0.6rem;
+        cursor: pointer;
+        color: white;
+        background: var(--primary);
+        transition: 0.2s;
+      }
+      .nav-buttons button:hover {
+        background: var(--secondary);
+      }
+      .mode-toggle {
+        cursor: pointer;
+        font-size: 1.2rem;
+        margin-left: 1rem;
+      }
+
+      /* Toggle buttons */
+      .view-toggle {
+        text-align: center;
+        margin: 1rem 0;
+      }
+      .view-toggle button {
+        margin: 0 0.5rem;
+        padding: 0.5rem 1.2rem;
+        border: none;
+        border-radius: 0.6rem;
+        background: var(--primary);
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .view-toggle button.active {
+        background: var(--secondary);
+      }
+      .view-toggle button:hover {
+        background: var(--secondary);
+      }
+
+      /* Table */
+      .table-container {
+        max-width: 1200px;
+        margin: auto;
+        overflow-x: auto;
+        display: block;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+      }
+      th,
+      td {
+        padding: 0.8rem 1rem;
+        text-align: left;
+        font-size: 0.95rem;
+      }
+      th {
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+      }
+      tr {
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      tr td {
+        background: var(--card);
+        padding: 0.8rem 1rem;
+        border-radius: 0.8rem;
+        vertical-align: middle;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      tr:hover td {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Issue */
+      .issue-icons {
+        display: flex;
+        gap: 0.7rem;
+        font-size: 0.85rem;
+        color: #555;
+        margin-top: 0.3rem;
+      }
+      img.issue-img {
+        width: 60px;
+        height: 40px;
+        border-radius: 0.4rem;
+        object-fit: cover;
+      }
+
+      /* Status badges */
+      .status {
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: white;
+        display: inline-block;
+      }
+      .status.currentlyinprogress {
+        background: var(--status-inprogress);
+      }
+      .status.assignedtoworker {
+        background: var(--status-assigned);
+      }
+      .status.resolved {
+        background: var(--status-resolved);
+      }
+      .status.na {
+        background: var(--status-na);
+      }
+
+      /* Map */
+      #map {
+        max-width: 1200px;
+        height: 500px;
+        margin: auto;
+        border-radius: 1rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .modal-content {
+        background: var(--card);
+        padding: 2rem;
+        border-radius: 1rem;
+        max-width: 600px;
+        width: 90%;
+        position: relative;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        animation: pop 0.3s ease;
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .modal-content img {
+        width: 100%;
+        border-radius: 0.6rem;
+        margin-bottom: 1rem;
+      }
+      .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: var(--text);
+      }
+      .modal button {
+        margin-top: 1rem;
+        margin-right: 1rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+      }
+      .modal button:hover {
+        background: var(--secondary);
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--primary);
+        color: #fff;
+        padding: 0.6rem 1rem;
+        border-radius: 0.5rem;
+        z-index: 10000;
+        opacity: 0;
+        transition: 0.3s;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>My Area</h1>
+      <div class="nav-buttons">
+        <button onclick="window.location.href='user_dashboard.html'">
+          Dashboard
+        </button>
+        <button onclick="window.location.href='myarea.html'">My Area</button>
+        <button onclick="window.location.href='leaderboard.html'">
+          Leaderboard
+        </button>
+        <button onclick="logout()">Logout</button>
+        <span class="mode-toggle" onclick="toggleTheme()">🌗</span>
+      </div>
+    </header>
+
+    <div class="view-toggle">
+      <button id="tableBtn" class="active">Table View</button>
+      <button id="mapBtn">Map View</button>
+    </div>
+
+    <div class="table-container" id="tableContainer">
+      <h2>Area Issues</h2>
+      <table id="areaTable">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Department</th>
+            <th>Location</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="issueModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img id="modalImage" src="" alt="Issue Image" />
+        <h3 id="modalTitle">Issue Title</h3>
+        <p id="modalDescription">Detailed description of the issue...</p>
+        <p><strong>Status:</strong> <span id="modalStatus">Open</span></p>
+        <p><strong>Department:</strong> <span id="modalDept">N/A</span></p>
+        <p><strong>Location:</strong> <span id="modalLocation">Area</span></p>
+        <p><strong>Date:</strong> <span id="modalDate">Sept 17, 2025</span></p>
+        <p>
+          <strong>Voters:</strong> <span id="modalVoters">0</span>
+          <strong>Verifiers:</strong> <span id="modalVerifiers">0</span>
+        </p>
+        <button onclick="verifyIssue()">Verify Issue</button>
+        <button onclick="votePriority()">Vote Priority</button>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+      const issuesData = [];
+      const statuses = [
+        "Currently In Progress",
+        "Assigned to Worker",
+        "Resolved",
+        "",
+      ];
+      const departments = [
+        "Public Works",
+        "Sanitation",
+        "Electrical",
+        "Water",
+        "Parks",
+        "Transport",
+        "Health",
+      ];
+
+      for (let i = 1; i <= 15; i++) {
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        issuesData.push({
+          image: `https://picsum.photos/400/250?random=${i}`,
+          title: `Issue ${i}`,
+          description: `Detailed description of issue ${i}.`,
+          status: status,
+          department:
+            status !== ""
+              ? departments[Math.floor(Math.random() * departments.length)]
+              : "",
+          location: `Location ${i}`,
+          date: `Sept ${i + 10}, 2025`,
+          coords: [28.6139 + Math.random() / 100, 77.209 + Math.random() / 100],
+          verifiers: Math.floor(Math.random() * 10),
+          voters: Math.floor(Math.random() * 20),
+        });
+      }
+
+      // Populate table
+      const tbody = document.getElementById("tableBody");
+      issuesData.forEach((issue, index) => {
+        const tr = document.createElement("tr");
+        tr.setAttribute("onclick", `openModal(${index})`);
+        const statusClass =
+          issue.status.toLowerCase().replace(/ /g, "") || "na";
+        tr.innerHTML = `
+          <td><img src="${issue.image}" class="issue-img"></td>
+          <td>${issue.title}
+            <div class="issue-icons">
+              <div><i class="fas fa-user-check"></i> ${issue.verifiers}</div>
+              <div><i class="fas fa-thumbs-up"></i> ${issue.voters}</div>
+            </div>
+          </td>
+          <td>${
+            issue.status
+              ? `<span class="status ${statusClass}">${issue.status}</span>`
+              : '<span class="status na">Not Assigned</span>'
+          }</td>
+          <td>${issue.department || "-"}</td>
+          <td>${issue.location}</td>
+          <td>${issue.date}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Modal functions
+      function openModal(index) {
+        const issue = issuesData[index];
+        document.getElementById("modalImage").src = issue.image;
+        document.getElementById("modalTitle").textContent = issue.title;
+        document.getElementById("modalDescription").textContent = issue.description;
+        document.getElementById("modalStatus").textContent =
+          issue.status || "Not Assigned";
+        document.getElementById("modalDept").textContent = issue.department || "-";
+        document.getElementById("modalLocation").textContent = issue.location;
+        document.getElementById("modalDate").textContent = issue.date;
+        document.getElementById("modalVoters").textContent = issue.voters;
+        document.getElementById("modalVerifiers").textContent = issue.verifiers;
+        document.getElementById("issueModal").style.display = "flex";
+      }
+      function closeModal() {
+        document.getElementById("issueModal").style.display = "none";
+      }
+      function verifyIssue() { showToast("You verified this issue"); }
+      function votePriority() { showToast("You increased issue priority"); }
+      function showToast(msg) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = 1; }, 10);
+        setTimeout(() => { toast.style.opacity = 0; setTimeout(() => toast.remove(), 300); }, 1500);
+      }
+      function logout() { window.location.href = "portal.html"; }
+      function toggleTheme() {
+        const html = document.documentElement;
+        html.getAttribute("data-theme") === "dark"
+          ? html.removeAttribute("data-theme")
+          : html.setAttribute("data-theme", "dark");
+      }
+
+      // View toggle
+      const tableBtn = document.getElementById("tableBtn"),
+        mapBtn = document.getElementById("mapBtn");
+      const tableContainer = document.getElementById("tableContainer"),
+        mapDiv = document.getElementById("map");
+      tableBtn.addEventListener("click", () => {
+        tableContainer.style.display = "block";
+        mapDiv.style.display = "none";
+        tableBtn.classList.add("active");
+        mapBtn.classList.remove("active");
+      });
+      mapBtn.addEventListener("click", () => {
+        tableContainer.style.display = "none";
+        mapDiv.style.display = "block";
+        mapBtn.classList.add("active");
+        tableBtn.classList.remove("active");
+        setTimeout(() => { map.invalidateSize(); }, 50);
+      });
+
+      // Map
+      const map = L.map("map").setView([28.6139, 77.209], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+      issuesData.forEach((issue, index) => {
+        const marker = L.marker(issue.coords).addTo(map);
+        marker.on("click", () => openModal(index));
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicConnect - Access Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+/* ---------- Root & Dark Mode Variables ---------- */
+:root {
+    --bg-color: #f7f9fc;
+    --card-bg: #ffffff;
+    --text-color: #1a1a1a;
+    --secondary-text-color: #666;
+    --primary-accent: #00b0ff;
+    --hover-bg: #e0e0e0;
+    --border-color: #ddd;
+    --input-bg: #fdfdfd;
+    --button-text-color: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+body.dark-mode {
+    --bg-color: #121b27;
+    --card-bg: #1a232f;
+    --text-color: #e0e3e6;
+    --secondary-text-color: #a0a8b4;
+    --primary-accent: #00b0ff;
+    --hover-bg: #2e3b4a;
+    --border-color: #444;
+    --input-bg: #222c3b;
+    --button-text-color: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* ---------- Global Styles ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+}
+
+/* ---------- Dark Mode Toggle ---------- */
+.mode-toggle {
+    position: absolute; top: 20px; right: 20px; z-index: 1000;
+}
+.checkbox { opacity: 0; position: absolute; }
+.label {
+    background-color: #111; border-radius: 50px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 5px; position: relative; height: 26px; width: 50px;
+    transition: background-color 0.3s ease;
+}
+.label .ball {
+    background-color: #fff; border-radius: 50%;
+    position: absolute; top: 2px; left: 2px; height: 22px; width: 22px;
+    transform: translateX(0px); transition: transform 0.3s linear, background-color 0.3s ease;
+}
+.checkbox:checked + .label .ball { transform: translateX(24px); }
+.fa-moon { color: #f1c40f; }
+.fa-sun { color: #f39c12; }
+
+/* ---------- Back to Landing ---------- */
+.back-link {
+    position: fixed; top: 20px; left: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500; text-decoration: none;
+    color: var(--primary-accent);
+    background: rgba(255,255,255,0.9); padding: 8px 12px;
+    border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: flex; align-items: center; gap: 6px; transition: 0.3s; z-index: 1000;
+}
+.back-link:hover {
+    background: var(--primary-accent); color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+body.dark-mode .back-link { background: rgba(30,30,47,0.9); color: var(--primary-accent); }
+body.dark-mode .back-link:hover { background: var(--primary-accent); color: #fff; }
+
+/* ---------- Login Card ---------- */
+.login-card {
+    background: var(--card-bg); border-radius: 15px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    width: 90%; max-width: 700px;
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+@media (min-width: 768px) { .login-card { flex-direction: row; } }
+
+/* ---------- Role Selector ---------- */
+.role-selector {
+    display: flex; width: 100%; border-bottom: 1px solid var(--border-color);
+    transition: border-color 0.3s ease;
+}
+@media (min-width: 768px) {
+    .role-selector { width: 200px; flex-direction: column; border-bottom: none; border-right: 1px solid var(--border-color); }
+}
+.role-btn {
+    flex-grow: 1; padding: 15px 20px; background: transparent;
+    border: none; color: var(--secondary-text-color);
+    font-size: 1.1em; font-family: 'Montserrat', sans-serif; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-bottom 0.3s ease;
+}
+.role-btn:hover { background-color: var(--hover-bg); color: var(--text-color); }
+.role-btn.active { color: var(--primary-accent); background-color: var(--hover-bg); border-bottom: 3px solid var(--primary-accent); }
+@media (min-width: 768px) { .role-btn.active { border-bottom: none; border-right: 3px solid var(--primary-accent); } }
+
+/* ---------- Form Content ---------- */
+.form-content { flex-grow: 1; padding: 30px; position: relative; }
+.form-section {
+    position: absolute; width: calc(100% - 60px); opacity: 0; visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+}
+.form-section.active { position: static; opacity: 1; visibility: visible; transform: translateY(0); }
+.form-section h3 { font-family: 'Montserrat', sans-serif; color: var(--primary-accent); margin-bottom: 25px; text-align: center; font-weight: 700; }
+
+/* ---------- Tabs ---------- */
+.tab-selector { display: flex; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); transition: border-color 0.3s ease; }
+.tab-btn {
+    flex-grow: 1; padding: 10px 15px; background: transparent; border: none;
+    color: var(--secondary-text-color); font-size: 1em; font-weight: 500; cursor: pointer;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+}
+.tab-btn:hover { color: var(--text-color); }
+.tab-btn.active { color: var(--primary-accent); border-bottom: 2px solid var(--primary-accent); }
+
+/* ---------- Forms ---------- */
+.user-form { opacity: 0; visibility: hidden; transform: translateY(10px); height: 0; overflow: hidden; transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease; }
+.user-form.active { opacity: 1; visibility: visible; transform: translateY(0); height: auto; overflow: visible; }
+.input-group { position: relative; margin-bottom: 15px; }
+.input-group .icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--secondary-text-color); transition: color 0.3s ease; }
+.input-group input { width: 100%; padding: 12px 12px 12px 45px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--input-bg); color: var(--text-color); font-size: 1em; outline: none; transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; }
+.input-group input::placeholder { color: var(--secondary-text-color); }
+.input-group input:focus { border-color: var(--primary-accent); box-shadow: 0 0 0 2px rgba(0, 176, 255, 0.2); }
+.input-group input:focus + .icon { color: var(--primary-accent); }
+.forgot-password { display: block; text-align: right; font-size: 0.9em; color: var(--primary-accent); text-decoration: none; margin-bottom: 20px; transition: color 0.3s ease; }
+.forgot-password:hover { text-decoration: underline; }
+.submit-btn { width: 100%; padding: 12px 20px; background-color: var(--primary-accent); color: var(--button-text-color); border: none; border-radius: 8px; font-size: 1.1em; font-family: 'Montserrat', sans-serif; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; }
+.submit-btn:hover { background-color: #0099e6; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 176, 255, 0.3); }
+.submit-btn:active { transform: translateY(0); box-shadow: none; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+    .login-card { width: 95%; margin: 20px; }
+    .form-content { padding: 20px; }
+    .form-section h3 { font-size: 1.2em; margin-bottom: 20px; }
+    .role-btn { font-size: 1em; padding: 12px 15px; }
+    .tab-btn { font-size: 0.95em; padding: 8px 10px; }
+}
+
+/* ---------- Signup Popup ---------- */
+#signupSuccessPopup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); z-index: 9999; }
+#signupSuccessPopup .popup-content { background: #fff; color: #111; padding: 2rem 3rem; border-radius: 1rem; text-align: center; animation: zoomIn 0.4s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+@keyframes zoomIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- Back Link -->
+<a href="landingpage.html" class="back-link">
+    <i class="fas fa-arrow-left"></i> Back to Landing
+</a>
+
+<!-- Dark Mode Toggle -->
+<div class="mode-toggle">
+    <input type="checkbox" id="darkModeToggle" class="checkbox">
+    <label for="darkModeToggle" class="label">
+        <i class="fas fa-moon"></i>
+        <i class="fas fa-sun"></i>
+        <div class="ball"></div>
+    </label>
+</div>
+
+<!-- Login Card -->
+<div class="login-card">
+    <div class="role-selector">
+        <button class="role-btn active" id="userRoleBtn" data-role="user">
+            <i class="fas fa-user-friends"></i> User
+        </button>
+        <button class="role-btn" id="adminRoleBtn" data-role="admin">
+            <i class="fas fa-shield-alt"></i> Admin
+        </button>
+    </div>
+
+    <div class="form-content">
+        <!-- User Forms -->
+        <div id="userForms" class="form-section active">
+            <div class="tab-selector">
+                <button class="tab-btn active" id="loginTabBtn" data-tab="login">Login</button>
+                <button class="tab-btn" id="signupTabBtn" data-tab="signup">Sign Up</button>
+            </div>
+
+            <form id="userLoginForm" class="active user-form" onsubmit="handleLogin(event,'user')">
+                <h3>Login</h3>
+                <div class="input-group"><i class="fas fa-envelope icon"></i><input type="email" placeholder="Email" required></div>
+                <div class="input-group"><i class="fas fa-lock icon"></i><input type="password" placeholder="Password" required></div>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+
+            <form id="userSignupForm" class="user-form" onsubmit="handleSignup(event)">
+                <h3>Sign Up</h3>
+                <div class="input-group"><i class="fas fa-user icon"></i><input type="text" placeholder="Full Name" required></div>
+                <div class="input-group"><i class="fas fa-envelope icon"></i><input type="email" placeholder="Email" required></div>
+                <div class="input-group"><i class="fas fa-lock icon"></i><input type="password" placeholder="Password" required></div>
+                <div class="input-group"><i class="fas fa-lock icon"></i><input type="password" placeholder="Confirm Password" required></div>
+                <button type="submit" class="submit-btn">Sign Up</button>
+            </form>
+        </div>
+
+        <!-- Admin Form -->
+        <div id="adminForm" class="form-section">
+            <h3>Admin Verification</h3>
+            <form onsubmit="handleLogin(event,'admin')">
+                <div class="input-group"><i class="fas fa-user-tie icon"></i><input type="text" placeholder="Name" required></div>
+                <div class="input-group"><i class="fas fa-building icon"></i><input type="text" placeholder="Department" required></div>
+                <div class="input-group"><i class="fas fa-id-card icon"></i><input type="text" placeholder="Official ID" required></div>
+                <button type="submit" class="submit-btn">Verify Access</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Signup Success Popup -->
+<div id="signupSuccessPopup">
+    <div class="popup-content">
+        <h2>🎉 Sign Up Successful!</h2>
+        <p>Redirecting you to the login section...</p>
+    </div>
+</div>
+
+<script>
+// ---------- JS Integration ----------
+document.addEventListener('DOMContentLoaded', () => {
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    const userRoleBtn = document.getElementById('userRoleBtn');
+    const adminRoleBtn = document.getElementById('adminRoleBtn');
+
+    const userFormsSection = document.getElementById('userForms');
+    const adminFormSection = document.getElementById('adminForm');
+
+    const loginTabBtn = document.getElementById('loginTabBtn');
+    const signupTabBtn = document.getElementById('signupTabBtn');
+
+    const userLoginForm = document.getElementById('userLoginForm');
+    const userSignupForm = document.getElementById('userSignupForm');
+
+    // Dark Mode Toggle
+    darkModeToggle.addEventListener('change', () => {
+        body.classList.toggle('dark-mode', darkModeToggle.checked);
+        localStorage.setItem('darkMode', darkModeToggle.checked);
+    });
+    if (localStorage.getItem('darkMode') === 'true') {
+        darkModeToggle.checked = true;
+        body.classList.add('dark-mode');
+    }
+
+    // Role Selection
+    function selectRole(role) {
+        userRoleBtn.classList.toggle('active', role === 'user');
+        adminRoleBtn.classList.toggle('active', role === 'admin');
+        userFormsSection.classList.toggle('active', role === 'user');
+        adminFormSection.classList.toggle('active', role === 'admin');
+    }
+    userRoleBtn.addEventListener('click', () => selectRole('user'));
+    adminRoleBtn.addEventListener('click', () => selectRole('admin'));
+
+    // User Tab Selection
+    function selectUserTab(tab) {
+        loginTabBtn.classList.toggle('active', tab === 'login');
+        signupTabBtn.classList.toggle('active', tab === 'signup');
+        userLoginForm.classList.toggle('active', tab === 'login');
+        userSignupForm.classList.toggle('active', tab === 'signup');
+    }
+    loginTabBtn.addEventListener('click', () => selectUserTab('login'));
+    signupTabBtn.addEventListener('click', () => selectUserTab('signup'));
+
+    // Initial load
+    selectRole('user');
+    selectUserTab('login');
+});
+
+// Signup handler
+function handleSignup(event) {
+    event.preventDefault();
+    const popup = document.getElementById("signupSuccessPopup");
+    popup.style.display = "flex";
+
+    setTimeout(() => {
+        popup.style.display = "none";
+        document.getElementById("loginTabBtn").classList.add("active");
+        document.getElementById("signupTabBtn").classList.remove("active");
+        document.getElementById("userLoginForm").classList.add("active");
+        document.getElementById("userSignupForm").classList.remove("active");
+    }, 2000);
+}
+
+// Login handler
+function handleLogin(event, role) {
+    event.preventDefault();
+    if(role === "admin") {
+        window.location.href = "admin_dashboard.html";
+    } else {
+        window.location.href = "user_dashboard.html";
+    }
+}
+</script>
+
+</body>
+</html>

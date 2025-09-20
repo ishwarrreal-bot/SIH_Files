@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nivaran - Empowering Civic Voices</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --secondary: #3b82f6;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --card: #1e293b;
+      --primary: #3b82f6;
+      --secondary: #60a5fa;
+    }
+
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      scroll-behavior: smooth;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* NAVBAR */
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 2.5rem;
+      background: var(--card);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      position: sticky; top: 0; z-index: 100;
+      transition: background 0.4s ease;
+    }
+    header h1 {
+      font-size: 1.8rem; color: var(--primary);
+    }
+    nav a {
+      text-decoration: none;
+      color: var(--text);
+      margin-left: 1.5rem;
+      font-weight: 500;
+      position: relative;
+      transition: color 0.3s;
+    }
+    nav a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0%; height: 2px;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+    nav a:hover::after {
+      width: 100%;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-primary:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+    .theme-toggle {
+      margin-left: 1.5rem;
+      background: none;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 0.4rem 0.7rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .theme-toggle:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 6rem 2rem 5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 0 0 2rem 2rem;
+      animation: fadeIn 1s ease;
+    }
+    .hero h2 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      animation: slideDown 1s ease;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      animation: fadeIn 1.2s ease;
+    }
+    .hero .btn-primary {
+      font-size: 1rem;
+      padding: 0.8rem 1.5rem;
+    }
+
+    /* SECTION HEADERS */
+    section {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: auto;
+      animation: fadeUp 1s ease;
+    }
+    section h3 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2.5rem;
+      color: var(--primary);
+    }
+
+    /* CARDS GRID */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap: 2rem;
+    }
+    .card {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.4s ease;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInUp 0.8s forwards;
+    }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.4s; }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    .card h4 {
+      margin-top: 1rem;
+      font-size: 1.3rem;
+    }
+    .card p {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      line-height: 1.4rem;
+    }
+
+    /* FOUNDERS */
+    .founders img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 0.7rem;
+      border: 3px solid var(--primary);
+    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+    .footer .socials a {
+      margin: 0 10px;
+      color: var(--primary);
+      font-size: 1.2rem;
+      transition: 0.3s;
+    }
+    .footer .socials a:hover {
+      color: var(--secondary);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    @keyframes slideDown { from {transform: translateY(-20px); opacity:0;} to {transform: translateY(0); opacity:1;} }
+    @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+    @keyframes fadeInUp { from {opacity:0; transform: translateY(30px);} to {opacity:1; transform: translateY(0);} }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header>
+    <h1>Nivaran</h1>
+    <nav>
+      <a href="#">Home</a>
+      <a href="#achievements">Achievements</a>
+      <a href="#issues">Issues</a>
+      <a href="#founders">Founders</a>
+      <a href="#about">About</a>
+      <button onclick="window.location.href='portal.html'" class="btn-primary">Login / Sign Up</button>
+      <button class="theme-toggle" onclick="toggleTheme()">🌗</button>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h2>Empowering Citizens to Build Better Cities</h2>
+    <p>Report civic issues, track resolutions, and collaborate to create cleaner and smarter communities.</p>
+    <button onclick="window.location.href='portal.html'" class="btn-primary">Get Started</button>
+  </section>
+
+  <!-- QUALITY / ACHIEVEMENTS -->
+  <section id="achievements">
+    <h3>Our Quality & Achievements</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>95% Resolution Rate</h4>
+        <p>Most reported issues are successfully solved within 5 days.</p>
+      </div>
+      <div class="card">
+        <h4>10,000+ Users</h4>
+        <p>Active citizens contributing to making their cities better.</p>
+      </div>
+      <div class="card">
+        <h4>Government Partners</h4>
+        <p>Collaborating with local municipalities for quick response.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ISSUES -->
+<section id="issues">
+  <h3>Issues Around You</h3>
+  <div class="issues-table-container">
+    <table class="issues-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Issue</th>
+          <th>Status</th>
+          <th>Location</th>
+          <th>Reported On</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><img src="https://picsum.photos/100/70?random=1" alt="Issue"></td>
+          <td>Overflowing Garbage Bin</td>
+          <td><span class="status pending">Pending</span></td>
+          <td>Sector 12, City Center</td>
+          <td>Sept 12, 2025</td>
+        </tr>
+        <tr>
+          <td><img src="https://picsum.photos/100/70?random=2" alt="Issue"></td>
+          <td>Broken Streetlight</td>
+          <td><span class="status open">Open</span></td>
+          <td>Green Park Colony</td>
+          <td>Sept 15, 2025</td>
+        </tr>
+        <tr>
+          <td><img src="https://picsum.photos/100/70?random=3" alt="Issue"></td>
+          <td>Potholes on Main Road</td>
+          <td><span class="status resolved">Resolved</span></td>
+          <td>MG Road Junction</td>
+          <td>Sept 17, 2025</td>
+        </tr>
+        <tr>
+          <td><img src="https://picsum.photos/100/70?random=4" alt="Issue"></td>
+          <td>Water Logging</td>
+          <td><span class="status progress">In Progress</span></td>
+          <td>Old Market Area</td>
+          <td>Sept 18, 2025</td>
+        </tr>
+        <tr>
+          <td><img src="https://picsum.photos/100/70?random=5" alt="Issue"></td>
+          <td>Damaged Park Bench</td>
+          <td><span class="status open">Open</span></td>
+          <td>Rose Garden Park</td>
+          <td>Sept 20, 2025</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .issues-table-container {
+    overflow-x: auto;
+  }
+  .issues-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 0.8rem;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+  .issues-table th, .issues-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  [data-theme="dark"] .issues-table th,
+  [data-theme="dark"] .issues-table td {
+    border-color: #334155;
+  }
+  .issues-table th {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .issues-table tr:hover {
+    background: rgba(59,130,246,0.08);
+    transition: background 0.2s;
+  }
+  [data-theme="dark"] .issues-table tr:hover {
+    background: rgba(96,165,250,0.15);
+  }
+  .issues-table img {
+    border-radius: 0.5rem;
+    display: block;
+  }
+  /* Status labels */
+  .status {
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+  }
+  .status.pending { background: #f59e0b; }
+  .status.open { background: #ef4444; }
+  .status.resolved { background: #22c55e; }
+  .status.progress { background: #3b82f6; }
+</style>
+
+
+  <!-- FOUNDERS -->
+  <section id="founders">
+    <h3>Meet Our Founders</h3>
+    <div class="card-grid founders">
+      <div class="card">
+        <img src="https://picsum.photos/100?random=1" alt="Founder 1">
+        <h4>Founder One</h4>
+        <p>Urban innovation enthusiast and social change maker.</p>
+      </div>
+      <div class="card">
+        <img src="https://picsum.photos/100?random=2" alt="Founder 2">
+        <h4>Founder Two</h4>
+        <p>Tech architect passionate about smart city solutions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <h3>About Nivaran</h3>
+    <div class="card-grid">
+      <div class="card">
+        <img src="https://picsum.photos/200/150?random=3" alt="About Image">
+        <h4>Founded By</h4>
+        <p>Nivaran was created by civic-minded students aiming to build a cleaner, more responsive city experience.</p>
+      </div>
+      <div class="card">
+        <img src="https://picsum.photos/200/150?random=4" alt="Why Image">
+        <h4>Why It’s Used</h4>
+        <p>Citizens can raise issues and track their progress easily without long offline processes.</p>
+      </div>
+      <div class="card">
+        <img src="https://picsum.photos/200/150?random=5" alt="How Image">
+        <h4>How It Works</h4>
+        <p>Login → Report issue with text/image/voice → Local body resolves → You track and verify.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="socials">
+      <a href="#"><i class="fab fa-facebook"></i></a>
+      <a href="#"><i class="fab fa-twitter"></i></a>
+      <a href="#"><i class="fab fa-linkedin"></i></a>
+    </div>
+    <p>© 2025 Nivaran • Empowering Civic Voices</p>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.getAttribute('data-theme') === 'dark') {
+        html.removeAttribute('data-theme');
+        localStorage.setItem("theme", "light");
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem("theme", "dark");
+      }
+    }
+
+    // persist theme
+    (function () {
+      if (localStorage.getItem("theme") === "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+</body>
+</html>
