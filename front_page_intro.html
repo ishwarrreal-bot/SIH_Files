@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CivicConnect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Cloud float animation */
+      .cloud {
+        animation: float 40s linear infinite;
+      }
+      @keyframes float {
+        from { transform: translateX(-200px); }
+        to { transform: translateX(100vw); }
+      }
+
+      /* Bird flying animation */
+      .bird {
+        animation: fly 15s linear infinite;
+      }
+      @keyframes fly {
+        from { transform: translateX(-10%) translateY(0); }
+        to { transform: translateX(110%) translateY(-30px); }
+      }
+
+      /* Wave animation */
+      .wave {
+        animation: waveMove 8s linear infinite;
+      }
+      @keyframes waveMove {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+      }
+    </style>
+  </head>
+  <body class="relative min-h-screen overflow-hidden bg-gradient-to-br from-green-100 via-yellow-50 to-blue-100 flex flex-col items-center justify-center p-6">
+
+    <!-- Clouds -->
+    <svg class="cloud absolute top-10 left-0 w-32 opacity-70 text-white" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 64 64">
+      <circle cx="20" cy="40" r="14"/><circle cx="40" cy="40" r="20"/>
+    </svg>
+    <svg class="cloud absolute top-20 left-10 w-40 opacity-60 text-white delay-1000" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 64 64">
+      <circle cx="20" cy="40" r="14"/><circle cx="40" cy="40" r="20"/>
+    </svg>
+
+    <!-- Bird -->
+    <svg class="bird absolute top-16 w-12 text-black opacity-70" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M2 12c4-4 8-4 12 0s8 4 12 0" stroke="currentColor" stroke-width="2" fill="none"/>
+    </svg>
+
+    <!-- Decorative Background Blobs -->
+    <div class="absolute top-0 left-0 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+    <div class="absolute bottom-0 right-0 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+
+    <!-- Leaves & Tree -->
+    <svg class="absolute bottom-0 left-0 w-48 opacity-70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="green">
+      <path d="M100 10C130 30 160 70 120 120C80 170 40 140 20 100C0 60 70 -10 100 10Z"/>
+    </svg>
+    <svg class="absolute bottom-0 right-10 w-40 opacity-80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+      <circle cx="32" cy="20" r="14" fill="#2ecc71"/>
+      <circle cx="22" cy="26" r="12" fill="#27ae60"/>
+      <circle cx="42" cy="26" r="12" fill="#27ae60"/>
+      <rect x="28" y="28" width="8" height="20" fill="#8e5a2b"/>
+    </svg>
+
+    <!-- Grass & Flowers -->
+    <div class="absolute bottom-0 left-0 right-0 flex justify-around items-end">
+      <svg class="w-12 h-12" xmlns="http://www.w3.org/2000/svg" fill="pink" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/><rect x="11" y="12" width="2" height="8" fill="green"/>
+      </svg>
+      <svg class="w-16 h-16" xmlns="http://www.w3.org/2000/svg" fill="yellow" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/><rect x="11" y="12" width="2" height="8" fill="green"/>
+      </svg>
+      <svg class="w-14 h-14" xmlns="http://www.w3.org/2000/svg" fill="red" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/><rect x="11" y="12" width="2" height="8" fill="green"/>
+      </svg>
+    </div>
+
+    <!-- Wavy Ground -->
+    <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+      <svg class="relative block w-[200%] h-24 wave text-blue-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="currentColor">
+        <path d="M0,0 C600,150 600,-150 1200,0 L1200,120 L0,120 Z"></path>
+      </svg>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="text-center mb-12 relative z-10">
+      <h1 class="text-5xl font-bold text-blue-900 mb-4">CivicConnect</h1>
+      <p class="text-lg text-blue-700 max-w-2xl mx-auto">
+        A crowdsourced civic issue resolution platform where citizens raise concerns,
+        communities unite, and governments act to build better cities together.
+      </p>
+      <div class="mt-6 flex justify-center gap-4">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl text-lg shadow-md">
+          Report an Issue
+        </button>
+        <button class="border border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-2xl text-lg shadow-md">
+          Explore Issues
+        </button>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl relative z-10">
+      <div class="rounded-2xl shadow-md hover:shadow-lg transition p-6 bg-white/80 backdrop-blur">
+        <div class="flex flex-col items-center text-center">
+          <span class="text-blue-700 text-4xl mb-3">📢</span>
+          <h3 class="font-semibold text-xl mb-2">Raise Your Voice</h3>
+          <p class="text-blue-600">Report issues in your locality with photos, details, and location tags.</p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl shadow-md hover:shadow-lg transition p-6 bg-white/80 backdrop-blur">
+        <div class="flex flex-col items-center text-center">
+          <span class="text-blue-700 text-4xl mb-3">👥</span>
+          <h3 class="font-semibold text-xl mb-2">Community Power</h3>
+          <p class="text-blue-600">Get your issue prioritized with upvotes and support from others.</p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl shadow-md hover:shadow-lg transition p-6 bg-white/80 backdrop-blur">
+        <div class="flex flex-col items-center text-center">
+          <span class="text-blue-700 text-4xl mb-3">✅</span>
+          <h3 class="font-semibold text-xl mb-2">Real Solutions</h3>
+          <p class="text-blue-600">Connect directly with government authorities for faster resolutions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="mt-16 text-center relative z-10">
+      <h2 class="text-3xl font-bold text-blue-900 mb-4">
+        Together, we can transform our cities.
+      </h2>
+      <button class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl text-lg shadow-md">
+        Get Started
+      </button>
+    </section>
+  </body>
+</html>
+
+
+
+
