@@ -299,6 +299,27 @@
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+  }
+
+  .report-box.sticky {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-heavy);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  [data-theme="dark"] .report-box.sticky {
+    background: rgba(26, 35, 47, 0.95);
   }
   
   .report-box:hover {
@@ -507,10 +528,56 @@
     border-radius: 12px;
     margin-top: 1rem;
     transition: all 0.3s ease;
+    position: relative;
   }
   
   .report:hover img {
     transform: scale(1.02);
+  }
+
+  /* ====== Geotag Overlay ====== */
+  .image-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .geotag-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 200px;
+    word-wrap: break-word;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+
+  .geotag-overlay:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.05);
+  }
+
+  .geotag-icon {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .geotag-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   .report-footer {
@@ -759,6 +826,7 @@
 
   .location-input input {
     flex: 1;
+    min-width: 300px;
   }
 
   .location-input button {
@@ -775,6 +843,12 @@
   .location-input button:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
+  }
+
+  .location-input button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
   }
 
   /* ====== Achievements & Leaderboard Page ====== */
@@ -1565,9 +1639,13 @@
         <span class="icon">🏠</span>
         <span>Home</span>
       </div>
+      <div class="sidebar-item" onclick="scrollToReportForm()">
+        <span class="icon">📝</span>
+        <span>Quick Report</span>
+      </div>
       <div class="sidebar-item" onclick="showPage('achievements')">
         <span class="icon">🏆</span>
-        <span>Achievements</span>
+        <span>Achievements & Leaderboard</span>
       </div>
       <div class="sidebar-item" onclick="showPage('analytics')">
         <span class="icon">📊</span>
@@ -1584,10 +1662,6 @@
       <div class="sidebar-item" onclick="window.location.href='../../SIH_Files-jimeet_updates/SIH_Files-jimeet_updates/myarea.html'">
         <span class="icon">🗺️</span>
         <span>My Area</span>
-      </div>
-      <div class="sidebar-item" onclick="window.location.href='../../SIH_Files-jimeet_updates/SIH_Files-jimeet_updates/leaderboard.html'">
-        <span class="icon">🏆</span>
-        <span>Leaderboard</span>
       </div>
       <div class="sidebar-item" onclick="logout()">
         <span class="icon">🚪</span>
@@ -1648,8 +1722,9 @@
             <div class="form-group">
               <label for="location">Location</label>
               <div class="location-input">
-                <input type="text" id="location" placeholder="Click to get your current location..." readonly>
+                <input type="text" id="location" placeholder="Click to get your current location or enter manually..." readonly>
                 <button type="button" id="getLocationBtn" onclick="getCurrentLocation()">📍 Get Location</button>
+                <button type="button" id="manualLocationBtn" onclick="enableManualLocation()">✏️ Enter Manually</button>
               </div>
             </div>
             <button type="submit">🚀 Post Issue</button>
@@ -1664,7 +1739,7 @@
       <div id="achievements-page" class="page-content" style="display: none;">
         <div class="page-header">
           <h2>🏆 Achievements & Leaderboard</h2>
-          <p>See who's making the biggest impact in solving civic issues</p>
+          <p>Track your progress and see who's making the biggest impact in solving civic issues</p>
         </div>
 
         <!-- Your Stats Section -->
@@ -2000,6 +2075,21 @@
     </div>
   </div>
 
+  <!-- Comment Modal -->
+  <div class="modal" id="commentModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <h2>💬 Comments</h2>
+      <div id="commentsContainer" style="max-height: 300px; overflow-y: auto; margin: 1rem 0; padding: 1rem; background: var(--bg-tertiary); border-radius: 8px;">
+        <!-- Comments will be populated here -->
+      </div>
+      <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+        <input type="text" id="commentInput" placeholder="Write a comment..." style="flex: 1; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-tertiary); color: var(--text-primary);">
+        <button onclick="postComment()" style="background: var(--gradient-primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;">Post</button>
+      </div>
+      <button class="close-btn" onclick="closeCommentModal()" style="margin-top: 1rem;">Close</button>
+    </div>
+  </div>
+
 <script>
 // ====== GLOBAL VARIABLES ======
 const themeToggle = document.getElementById('themeToggle');
@@ -2012,6 +2102,8 @@ const searchInput = document.getElementById('searchInput');
 let currentReport = null;
 let currentPage = 'main';
 let userLocation = null;
+let currentCommentReport = null;
+let comments = {}; // Store comments by report ID
 let userStats = {
   reportsPosted: 0,
   issuesResolved: 0,
@@ -2079,8 +2171,10 @@ function showPage(pageName) {
 function getCurrentLocation() {
   if (navigator.geolocation) {
     const locationBtn = document.getElementById('getLocationBtn');
+    const manualBtn = document.getElementById('manualLocationBtn');
     locationBtn.textContent = '📍 Getting Location...';
     locationBtn.disabled = true;
+    manualBtn.disabled = true;
     
     navigator.geolocation.getCurrentPosition(
       function(position) {
@@ -2093,15 +2187,68 @@ function getCurrentLocation() {
         
         locationBtn.textContent = '✅ Location Set';
         locationBtn.style.background = 'var(--success-color)';
+        manualBtn.disabled = false;
       },
       function(error) {
-        alert('Unable to get your location. Please enter manually.');
+        alert('Unable to get your location. Please use the "Enter Manually" button to type your location.');
         locationBtn.textContent = '📍 Get Location';
         locationBtn.disabled = false;
+        manualBtn.disabled = false;
       }
     );
   } else {
-    alert('Geolocation is not supported by this browser.');
+    alert('Geolocation is not supported by this browser. Please use the "Enter Manually" button to type your location.');
+  }
+}
+
+function enableManualLocation() {
+  const locationInput = document.getElementById('location');
+  const getLocationBtn = document.getElementById('getLocationBtn');
+  const manualBtn = document.getElementById('manualLocationBtn');
+  
+  // Enable manual input
+  locationInput.removeAttribute('readonly');
+  locationInput.focus();
+  locationInput.placeholder = 'Enter your location manually...';
+  
+  // Update button states
+  getLocationBtn.disabled = true;
+  manualBtn.textContent = '✅ Save Location';
+  manualBtn.onclick = saveManualLocation;
+  
+  // Add event listener for Enter key
+  locationInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      saveManualLocation();
+    }
+  });
+  
+  console.log('Manual location input enabled');
+}
+
+function saveManualLocation() {
+  const locationInput = document.getElementById('location');
+  const getLocationBtn = document.getElementById('getLocationBtn');
+  const manualBtn = document.getElementById('manualLocationBtn');
+  
+  if (locationInput.value.trim()) {
+    // Set user location as manual entry
+    userLocation = { manual: true, address: locationInput.value.trim() };
+    
+    // Update UI
+    locationInput.setAttribute('readonly', 'true');
+    locationInput.style.background = 'var(--success-color)';
+    locationInput.style.color = 'white';
+    
+    getLocationBtn.disabled = false;
+    manualBtn.textContent = '✏️ Edit Location';
+    manualBtn.onclick = enableManualLocation;
+    
+    // Show success message
+    alert('Location saved successfully!');
+    console.log('Manual location saved:', locationInput.value.trim());
+  } else {
+    alert('Please enter a valid location.');
   }
 }
 
@@ -2129,7 +2276,7 @@ function addSampleReports() {
     {
       title: "Broken Traffic Light",
       description: "The traffic light at the intersection of Main St and Oak Ave has been stuck on red for 3 days, causing major traffic congestion during rush hours.",
-      image: null,
+      image: "https://via.placeholder.com/400x250/ff6b6b/ffffff?text=Traffic+Light+Issue",
       likes: 12,
       comments: 3,
       location: "Main St & Oak Ave",
@@ -2139,7 +2286,7 @@ function addSampleReports() {
     {
       title: "Pothole on Highway 101",
       description: "Large pothole on the right lane of Highway 101 near exit 15. It's getting deeper and could cause vehicle damage.",
-      image: null,
+      image: "https://via.placeholder.com/400x250/4ecdc4/ffffff?text=Pothole+Issue",
       likes: 8,
       comments: 1,
       location: "Highway 101, Exit 15",
@@ -2149,7 +2296,7 @@ function addSampleReports() {
     {
       title: "Street Light Out",
       description: "Street light on Elm Street between blocks 200-300 is completely dark, making it unsafe for pedestrians at night.",
-      image: null,
+      image: "https://via.placeholder.com/400x250/ffe66d/ffffff?text=Street+Light+Issue",
       likes: 15,
       comments: 5,
       location: "Elm Street, Block 200-300",
@@ -2176,10 +2323,15 @@ reportForm.addEventListener('submit', function(e) {
     return;
   }
 
+  // Check if location is manually entered
+  if (userLocation && userLocation.manual) {
+    location = userLocation.address;
+  }
+
   const reportData = {
     title,
     description,
-    image: imageFile,
+    image: imageFile || null,
     likes: 0,
     comments: 0,
     location,
@@ -2191,9 +2343,24 @@ reportForm.addEventListener('submit', function(e) {
   reportsContainer.prepend(report);
   reportForm.reset();
   userLocation = null;
-  document.getElementById('getLocationBtn').textContent = '📍 Get Location';
-  document.getElementById('getLocationBtn').style.background = '';
-  document.getElementById('getLocationBtn').disabled = false;
+  
+  // Reset location buttons
+  const locationInput = document.getElementById('location');
+  const getLocationBtn = document.getElementById('getLocationBtn');
+  const manualBtn = document.getElementById('manualLocationBtn');
+  
+  locationInput.setAttribute('readonly', 'true');
+  locationInput.style.background = '';
+  locationInput.style.color = '';
+  locationInput.placeholder = 'Click to get your current location or enter manually...';
+  
+  getLocationBtn.textContent = '📍 Get Location';
+  getLocationBtn.style.background = '';
+  getLocationBtn.disabled = false;
+  
+  manualBtn.textContent = '✏️ Enter Manually';
+  manualBtn.disabled = false;
+  manualBtn.onclick = enableManualLocation;
   
   // Update user stats
   userStats.reportsPosted++;
@@ -2223,7 +2390,15 @@ function createReportElement(reportData, timestamp) {
     </div>
     <div class="report-content">
       <p>${reportData.description}</p>
-      ${reportData.image ? `<img src="${URL.createObjectURL(reportData.image)}" alt="Report image">` : ""}
+      ${reportData.image ? `
+        <div class="image-container" style="margin-top: 10px;">
+          <img src="${typeof reportData.image === 'string' ? reportData.image : URL.createObjectURL(reportData.image)}" alt="Report image" style="max-width: 100%; height: auto; border-radius: 8px;">
+          <div class="geotag-overlay">
+            <span class="geotag-icon">📍</span>
+            <span class="geotag-text">${reportData.location}</span>
+          </div>
+        </div>
+      ` : ""}
     </div>
     <div class="report-footer">
       <div class="report-stats">
@@ -2231,7 +2406,7 @@ function createReportElement(reportData, timestamp) {
           <span>👍</span>
           <span>${reportData.likes}</span>
         </div>
-        <div class="stat-item">
+        <div class="stat-item comment-btn">
           <span>💬</span>
           <span>${reportData.comments}</span>
         </div>
@@ -2252,6 +2427,12 @@ function createReportElement(reportData, timestamp) {
   report.querySelector('.rating-btn').addEventListener('click', () => {
     currentReport = report;
     modal.style.display = 'flex';
+  });
+
+  // Add comment functionality
+  report.querySelector('.comment-btn').addEventListener('click', function() {
+    currentCommentReport = report;
+    openCommentModal();
   });
 
   // Add upvote functionality
@@ -2596,6 +2777,127 @@ function closeModal(){
   modal.style.display = 'none'; 
 }
 
+// ====== COMMENT SYSTEM ======
+function openCommentModal() {
+  const commentModal = document.getElementById('commentModal');
+  const commentsContainer = document.getElementById('commentsContainer');
+  const commentInput = document.getElementById('commentInput');
+  
+  // Get report ID (use timestamp as unique identifier)
+  const reportId = currentCommentReport.dataset.timestamp;
+  
+  // Initialize comments for this report if not exists
+  if (!comments[reportId]) {
+    comments[reportId] = [];
+  }
+  
+  // Display existing comments
+  displayComments(reportId);
+  
+  // Show modal
+  commentModal.style.display = 'flex';
+  
+  // Focus on input
+  setTimeout(() => {
+    commentInput.focus();
+  }, 100);
+  
+  // Add Enter key support
+  commentInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      postComment();
+    }
+  });
+}
+
+function closeCommentModal() {
+  const commentModal = document.getElementById('commentModal');
+  commentModal.style.display = 'none';
+  currentCommentReport = null;
+}
+
+function displayComments(reportId) {
+  const commentsContainer = document.getElementById('commentsContainer');
+  const reportComments = comments[reportId] || [];
+  
+  if (reportComments.length === 0) {
+    commentsContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-style: italic;">No comments yet. Be the first to comment!</p>';
+    return;
+  }
+  
+  commentsContainer.innerHTML = reportComments.map(comment => `
+    <div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">U</div>
+        <span style="font-weight: 600; color: var(--text-primary);">User</span>
+        <span style="color: var(--text-muted); font-size: 0.8rem;">${comment.timestamp}</span>
+      </div>
+      <p style="margin: 0; color: var(--text-secondary); line-height: 1.4;">${comment.text}</p>
+    </div>
+  `).join('');
+}
+
+function postComment() {
+  const commentInput = document.getElementById('commentInput');
+  const commentText = commentInput.value.trim();
+  
+  if (!commentText) {
+    alert('Please enter a comment.');
+    return;
+  }
+  
+  if (!currentCommentReport) {
+    alert('No report selected.');
+    return;
+  }
+  
+  const reportId = currentCommentReport.dataset.timestamp;
+  
+  // Initialize comments for this report if not exists
+  if (!comments[reportId]) {
+    comments[reportId] = [];
+  }
+  
+  // Add new comment
+  const newComment = {
+    text: commentText,
+    timestamp: getTimeAgo(new Date()),
+    user: 'User'
+  };
+  
+  comments[reportId].push(newComment);
+  
+  // Update comment count in the report
+  const commentCountElement = currentCommentReport.querySelector('.comment-btn span:last-child');
+  let commentCount = parseInt(commentCountElement.textContent);
+  commentCountElement.textContent = commentCount + 1;
+  
+  // Clear input and refresh display
+  commentInput.value = '';
+  displayComments(reportId);
+  
+  // Show success feedback
+  commentInput.placeholder = 'Comment posted!';
+  setTimeout(() => {
+    commentInput.placeholder = 'Write a comment...';
+  }, 2000);
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) {
+    return 'Just now';
+  } else if (diffInSeconds < 3600) {
+    return Math.floor(diffInSeconds / 60) + ' min ago';
+  } else if (diffInSeconds < 86400) {
+    return Math.floor(diffInSeconds / 3600) + ' hr ago';
+  } else {
+    return Math.floor(diffInSeconds / 86400) + ' day ago';
+  }
+}
+
 // ====== UTILITY FUNCTIONS ======
 function updateTimers() {
   document.querySelectorAll('.report').forEach(report => {
@@ -2622,6 +2924,25 @@ function openLocationPopup(){
   alert('📍 Nearby issues are shown on the right sidebar! Hover over any issue to see details.'); 
 }
 
+// Scroll to report form function
+function scrollToReportForm() {
+  const reportBox = document.querySelector('.report-box');
+  if (reportBox) {
+    reportBox.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start' 
+    });
+    
+    // Focus on the title input after scrolling
+    setTimeout(() => {
+      const titleInput = document.getElementById('title');
+      if (titleInput) {
+        titleInput.focus();
+      }
+    }, 500);
+  }
+}
+
 // Logout function
 function logout() {
   if (confirm('Are you sure you want to logout?')) {
@@ -2637,7 +2958,70 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize all functionality
   loadUserStats();
   loadSettings();
+  
+  // Initialize sticky report form
+  initStickyReportForm();
 });
+
+// ====== STICKY REPORT FORM ======
+function initStickyReportForm() {
+  const reportBox = document.querySelector('.report-box');
+  const originalTop = reportBox.offsetTop;
+  const originalHeight = reportBox.offsetHeight;
+  
+  // Create a placeholder to maintain layout when sticky
+  const placeholder = document.createElement('div');
+  placeholder.style.height = '0px';
+  placeholder.style.transition = 'height 0.3s ease';
+  reportBox.parentNode.insertBefore(placeholder, reportBox.nextSibling);
+  
+  function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const navHeight = document.querySelector('nav').offsetHeight;
+    
+    if (scrollTop > originalTop - navHeight - 20) {
+      // Make sticky
+      reportBox.classList.add('sticky');
+      placeholder.style.height = originalHeight + 'px';
+      
+      // Hide some elements in sticky mode for space
+      const formGroups = reportBox.querySelectorAll('.form-group');
+      formGroups.forEach((group, index) => {
+        if (index > 1) { // Hide image and location fields in sticky mode
+          group.style.display = 'none';
+        }
+      });
+      
+      // Update title to be shorter
+      const title = reportBox.querySelector('h3');
+      if (title.textContent === '📝 Report New Issue') {
+        title.textContent = '📝 Quick Report';
+      }
+    } else {
+      // Remove sticky
+      reportBox.classList.remove('sticky');
+      placeholder.style.height = '0px';
+      
+      // Show all elements
+      const formGroups = reportBox.querySelectorAll('.form-group');
+      formGroups.forEach(group => {
+        group.style.display = 'block';
+      });
+      
+      // Restore original title
+      const title = reportBox.querySelector('h3');
+      if (title.textContent === '📝 Quick Report') {
+        title.textContent = '📝 Report New Issue';
+      }
+    }
+  }
+  
+  // Add scroll listener
+  window.addEventListener('scroll', handleScroll);
+  
+  // Initial check
+  handleScroll();
+}
 </script>
 </body>
 </html>
