@@ -269,6 +269,27 @@ function getTaskClass(priority){
   return "low";
 }
 
+const body = document.body;
+
+// Apply saved theme on load
+if (localStorage.getItem("darkMode") === "true") {
+  body.classList.add("dark-mode");
+} else {
+  body.classList.remove("dark-mode");
+}
+
+function toggleTheme() {
+  body.classList.toggle("dark-mode");
+
+  // Save the current mode
+  if (body.classList.contains("dark-mode")) {
+    localStorage.setItem("darkMode", "true");
+  } else {
+    localStorage.setItem("darkMode", "false");
+  }
+}
+
+
 // Modal Functions
 function openModal(workerName, type, taskName){
   const worker = workers.find(w=>w.name===workerName);
@@ -292,7 +313,6 @@ document.getElementById("searchWorker").addEventListener("input", e=>{
 });
 
 // Dark/Light toggle
-function toggleTheme(){ document.body.classList.toggle('dark-mode'); }
 
 // Initial Load
 populateWorkers();
