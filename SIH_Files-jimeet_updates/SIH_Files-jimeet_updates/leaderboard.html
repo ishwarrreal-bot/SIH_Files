@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nivaran - Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    :root {
+      --navbar-bg: #2563eb;
+      --primary: #2563eb;
+      --secondary: #3b82f6;
+      --tertiary: #60a5fa;
+      --bg: #f0f8ff;
+      --text: #1e293b;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: var(--text);
+      transition: 0.3s;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Navbar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: var(--navbar-bg);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1 { font-size: 1.8rem; }
+    .nav-buttons { display: flex; gap: 1rem; align-items: center; }
+    .nav-buttons button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      background: white;
+      color: var(--primary);
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .nav-buttons button:hover { background: var(--tertiary); color: white; }
+
+    /* Leaderboard Header */
+    .leaderboard-header {
+      text-align: center;
+      margin: 2rem 0;
+      font-size: 3rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      color: #fff;
+      text-shadow: 2px 2px 10px #000;
+    }
+
+    /* Podium */
+    .podium {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+    .podium-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      width: 150px;
+      border-radius: 1rem;
+      padding: 1rem;
+      color: white;
+      position: relative;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: popUp 1s ease;
+    }
+    @keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .podium-card img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; margin-bottom: 0.5rem; }
+    .podium-card h2 { margin: 0; font-size: 1.2rem; font-weight: 700; text-align: center; }
+    .podium-card p { margin: 0.2rem 0 0; font-size: 1rem; font-weight: 600; }
+    .podium-card:hover { transform: translateY(-10px) scale(1.05); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
+    .first { height: 250px; background: linear-gradient(135deg,#ffdc00,#ff9a00); box-shadow: 0 0 30px #fff; }
+    .second { height: 200px; background: linear-gradient(135deg,#6a11cb,#2575fc); }
+    .third { height: 180px; background: linear-gradient(135deg,#ff416c,#ff4b2b); }
+
+    /* Your Stats */
+    .your-stats {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: glow 2s infinite alternate;
+    }
+    .stats-cards {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+    }
+    .stat-card {
+      background: linear-gradient(135deg,#f6d365,#fda085);
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 12px 25px rgba(0,0,0,0.3); }
+    .stat-card h3 { margin: 0; font-size: 1rem; color: #fff; font-weight: 600; }
+    .stat-card p { margin: 0.5rem 0 0; font-size: 1.2rem; font-weight: 700; color: #fff; }
+
+    /* Citizen Points */
+    .citizen-points { margin-top: 1rem; text-align: left; }
+    .citizen-points p { font-weight: 600; margin-bottom: 0.5rem; color: #fff; }
+    .progress-bar { width: 100%; height: 20px; border-radius: 10px; background: rgba(255,255,255,0.2); overflow: hidden; }
+    .progress-bar-inner { height: 100%; border-radius: 10px; background: linear-gradient(90deg,#ffdc00,#ff9a00); display: flex; align-items: center; justify-content: center; color:black; font-weight:600; width:0; animation: fillBar 2s ease forwards; }
+    @keyframes fillBar { 0% { width:0; } 100% { width: var(--progress); } }
+
+    /* Tabs */
+    .tabs { display: flex; justify-content: center; margin: 2rem 0 1rem; gap: 1rem; }
+    .tabs button { padding: 0.6rem 1.2rem; border: none; border-radius: 1rem; background: var(--secondary); color: white; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.3s; }
+    .tabs button.active { background: var(--primary); transform: scale(1.05); }
+
+    /* Vertical Lists */
+    .leaderboard-list {
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.8rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .leaderboard-list.active { display: flex; }
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 1rem;
+      background: linear-gradient(90deg,#ff9a9e,#fad0c4);
+      border-radius: 0.8rem;
+      font-weight: 600;
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .leaderboard-item:hover { transform: translateX(5px); box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+
+    @keyframes glow { 0% { box-shadow: 0 0 10px #fff; } 100% { box-shadow: 0 0 40px #fff; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Leaderboard</h1>
+    <div class="nav-buttons">
+      <button onclick="window.location.href='../../backend/parth/parth_user_dashbord.html'">Dashboard</button>
+      <button onclick="window.location.href='myarea.html'">My Area</button>
+      <button onclick="window.location.href='leaderboard.html'">Leaderboard</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- Your Stats -->
+  <div class="your-stats">
+    <h2>Your Stats</h2>
+    <div class="stats-cards">
+      <div class="stat-card"><h3>Rank</h3><p>#12</p></div>
+      <div class="stat-card"><h3>Reports</h3><p>24</p></div>
+      <div class="stat-card"><h3>Verified</h3><p>18</p></div>
+    </div>
+    <div class="citizen-points">
+      <p>Citizen Points: 450</p>
+      <div class="progress-bar">
+        <div class="progress-bar-inner" style="--progress:90%">450 pts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Podium -->
+  <div class="leaderboard-header"><i class="fas fa-trophy"></i> Champion Podium</div>
+  <div class="podium" id="podium"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button id="monthlyTab" class="active">Monthly</button>
+    <button id="allTimeTab">All-Time</button>
+  </div>
+
+  <!-- Vertical Leaderboards -->
+  <div class="leaderboard-list active" id="monthlyList"></div>
+  <div class="leaderboard-list" id="allTimeList"></div>
+
+  <script>
+    // Podium
+    const podiumUsers = [
+      { name: "Alice", points: 150, img:"https://i.pravatar.cc/100?img=1", class:"first" },
+      { name: "Bob", points: 120, img:"https://i.pravatar.cc/100?img=2", class:"second" },
+      { name: "Charlie", points: 100, img:"https://i.pravatar.cc/100?img=3", class:"third" },
+    ];
+    const podium = document.getElementById("podium");
+    podiumUsers.forEach(u => {
+      const card = document.createElement("div");
+      card.className = `podium-card ${u.class}`;
+      card.innerHTML = `<img src="${u.img}" alt="${u.name}"><h2>${u.name}</h2><p>${u.points} pts</p>`;
+      podium.appendChild(card);
+    });
+
+    // Vertical Leaderboards
+    const monthlyUsers = [
+      { name:"David", points:90},{ name:"Eve", points:85},{ name:"Frank", points:80},
+      { name:"Grace", points:75},{ name:"Hannah", points:70},{ name:"Ian", points:65},
+      { name:"Jack", points:60},{ name:"Kelly", points:55},{ name:"Lara", points:50},
+      { name:"Mike", points:45},
+    ];
+    const allTimeUsers = [
+      { name:"Liam", points:150},{ name:"Mia", points:140},{ name:"Noah", points:130},
+      { name:"Olivia", points:120},{ name:"Pam", points:110},{ name:"Quinn", points:100},
+      { name:"Ryan", points:95},{ name:"Sophia", points:90},{ name:"Tom", points:85},
+      { name:"Uma", points:80},
+    ];
+    const monthlyList = document.getElementById("monthlyList");
+    const allTimeList = document.getElementById("allTimeList");
+    function createItem(user,index){
+      const item = document.createElement("div");
+      item.className = "leaderboard-item";
+      item.innerHTML = `<span>#${index+4} ${user.name}</span>
+        <div class="progress-bar" style="--progress:${user.points}%">
+          <div class="progress-bar-inner">${user.points} pts</div>
+        </div>`;
+      return item;
+    }
+    monthlyUsers.forEach((u,i)=>monthlyList.appendChild(createItem(u,i)));
+    allTimeUsers.forEach((u,i)=>allTimeList.appendChild(createItem(u,i)));
+
+    // Tabs
+    const monthlyTab = document.getElementById("monthlyTab");
+    const allTimeTab = document.getElementById("allTimeTab");
+    monthlyTab.addEventListener("click", ()=>{
+      monthlyTab.classList.add("active"); allTimeTab.classList.remove("active");
+      monthlyList.classList.add("active"); allTimeList.classList.remove("active");
+    });
+    allTimeTab.addEventListener("click", ()=>{
+      allTimeTab.classList.add("active"); monthlyTab.classList.remove("active");
+      allTimeList.classList.add("active"); monthlyList.classList.remove("active");
+    });
+
+    function logout(){ window.location.href="portal.html"; }
+  </script>
+</body>
+</html>

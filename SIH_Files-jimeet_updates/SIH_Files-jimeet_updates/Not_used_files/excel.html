@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gov.Admin - Reports</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #1e3a8a;
+      color: #fff;
+      padding: 0.8rem 1.5rem;
+    }
+    .logo { font-weight: bold; font-size: 1.5rem; color: #fbc02d; }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .theme-toggle { font-size: 1.4rem; cursor: pointer; color: #fbc02d; transition: color 0.3s, transform 0.3s; }
+    .theme-toggle:hover { transform: rotate(25deg); color: #ff7043; }
+
+    /* Filter bar */
+    .filter-bar {
+      max-width: 1000px;
+      margin: 1.5rem auto;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .filter-bar select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #1e3a8a;
+      font-size: 0.95rem;
+      background: #fff;
+      color: #1e3a8a;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .filter-bar select:hover { background: #fbc02d; color: #7e9be8; transform: scale(1.05); }
+
+    .reports-container {
+      max-width: 1000px;
+      margin: 0 auto 2rem auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .report-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: 50px 100px 1fr 120px 30px;
+      align-items: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+    .report-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+      background-color: #fff4e0; /* subtle theme hover */
+    }
+
+    .priority-icon {
+      font-size: 1.2rem;
+    }
+    .high { color: #e53935; }      /* red danger */
+    .medium { color: #ff7043; }    /* orange urgent */
+    .low { color: #fbc02d; }       /* yellow alert */
+
+    .problem { color: #20b3e2; font-weight: bold; cursor: pointer; transition: color 0.2s; }
+    .problem:hover { color: #ff7043; text-decoration: underline; }
+
+    /* Modal */
+    .modal {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: #fff; border-radius: 12px; padding: 20px;
+      width: 400px; max-width: 90%; position: relative;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from { transform: translateY(-20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    .modal-content img { width: 100%; border-radius: 10px; margin: 12px 0; }
+    .close-modal { position: absolute; top: 10px; right: 12px; cursor: pointer; font-size: 1.3rem; color: #e53935; }
+
+    /* Dark mode */
+    .dark-mode { background: #121212; color: #fff; }
+    .dark-mode .report-card { background: #1f1f1f; }
+    .dark-mode .report-card:hover { background: #333; }
+    .dark-mode .modal-content { background: #1f1f1f; color: #fff; }
+    .dark-mode .filter-bar select { background: #1f1f1f; color: #fff; border: 1px solid #2196f3; }
+    .dark-mode .filter-bar select:hover { background: #2196f3; color: #fff; }
+
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Gov.Admin</div>
+    <div class="nav-right">
+      <i class="fa-regular fa-moon theme-toggle" id="themeToggle" title="Toggle Dark/Light"></i>
+    </div>
+  </nav>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <select id="priorityFilter">
+      <option value="all">All Priorities</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+    <select id="dateSort">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+    </select>
+  </div>
+
+  <main class="reports-container" id="reportsContainer"></main>
+
+  <!-- Modal -->
+  <div class="modal" id="reportModal">
+    <div class="modal-content" id="modalContent">
+      <span class="close-modal" id="closeModal"><i class="fa-solid fa-xmark"></i></span>
+      <h3 id="modalProblem"></h3>
+      <div id="modalInfo"></div>
+      <img src="" alt="Report Image" id="modalImage">
+    </div>
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const reportsContainer = document.getElementById('reportsContainer');
+    const modal = document.getElementById('reportModal');
+    const closeModal = document.getElementById('closeModal');
+    const modalProblem = document.getElementById('modalProblem');
+    const modalInfo = document.getElementById('modalInfo');
+    const modalImage = document.getElementById('modalImage');
+
+    const priorityFilter = document.getElementById('priorityFilter');
+    const dateSort = document.getElementById('dateSort');
+
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      themeToggle.className = body.classList.contains('dark-mode') ? 'fa-regular fa-sun theme-toggle' : 'fa-regular fa-moon theme-toggle';
+    });
+
+    const reports = [
+      { id: 1, userId: 'U001', userName: 'John Doe', problem: 'Pothole', date: '2025-09-18', priority:'high', image: 'https://picsum.photos/400/200?random=1', location: 'Sector 12, City', time:'14:30' },
+      { id: 2, userId: 'U002', userName: 'Jane Smith', problem: 'Garbage', date: '2025-09-17', priority:'medium', image: 'https://picsum.photos/400/200?random=2', location: 'Park Avenue', time:'10:15' },
+      { id: 3, userId: 'U003', userName: 'Bob Johnson', problem: 'Streetlight', date: '2025-09-16', priority:'low', image: 'https://picsum.photos/400/200?random=3', location: 'Riverside', time:'09:00' },
+    ];
+
+    function renderReports() {
+      let filteredReports = [...reports];
+
+      const priorityVal = priorityFilter.value;
+      if(priorityVal !== 'all'){
+        filteredReports = filteredReports.filter(r => r.priority === priorityVal);
+      }
+
+      const sortVal = dateSort.value;
+      filteredReports.sort((a,b) => sortVal === 'newest' ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date));
+
+      reportsContainer.innerHTML = '';
+      filteredReports.forEach(report => {
+        const card = document.createElement('div');
+        card.className = 'report-card';
+        let icon = '';
+        if(report.priority === 'high') icon = '<i class="fa-solid fa-triangle-exclamation priority-icon high" title="High Priority"></i>';
+        else if(report.priority === 'medium') icon = '<i class="fa-solid fa-circle-exclamation priority-icon medium" title="Medium Priority"></i>';
+        else icon = '<i class="fa-solid fa-circle-info priority-icon low" title="Low Priority"></i>';
+
+        card.innerHTML = `
+          <span>${report.id}</span>
+          <span>${report.userId}</span>
+          <span class="problem">${report.problem}</span>
+          <span>${report.date}</span>
+          <div>${icon}</div>
+        `;
+        card.querySelector('.problem').addEventListener('click', () => openModal(report));
+        reportsContainer.appendChild(card);
+      });
+    }
+
+    function openModal(report) {
+      modalProblem.textContent = report.problem + ' Report';
+      modalInfo.innerHTML = `
+        <p><i class="fa-solid fa-id-badge"></i> User ID: ${report.userId}</p>
+        <p><i class="fa-solid fa-user"></i> Name: ${report.userName}</p>
+        <p><i class="fa-solid fa-map-marker-alt"></i> Location: ${report.location}</p>
+        <p><i class="fa-solid fa-calendar-alt"></i> Date: ${report.date}</p>
+        <p><i class="fa-solid fa-clock"></i> Time: ${report.time}</p>
+      `;
+      modalImage.src = report.image;
+      modal.classList.add('active');
+    }
+
+    closeModal.addEventListener('click', () => modal.classList.remove('active'));
+    window.addEventListener('click', e => { if(e.target === modal) modal.classList.remove('active'); });
+
+    priorityFilter.addEventListener('change', renderReports);
+    dateSort.addEventListener('change', renderReports);
+
+    renderReports();
+  </script>
+
+</body>
+</html>

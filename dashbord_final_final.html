@@ -1,0 +1,3547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Civic Issue Dashboard</title>
+<style>
+  /* ====== CSS Variables for Theme ====== */
+  :root {
+    /* Light Theme - SIH Files Color Scheme */
+    --bg-primary: #f5f8ff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f7f9fc;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --accent-primary: #007bff;
+    --accent-secondary: #00b0ff;
+    --accent-hover: #0056b3;
+    --border-color: #ddd;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --gradient-primary: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    --gradient-secondary: linear-gradient(135deg, #00b0ff 0%, #007bff 100%);
+    --success-color: #52c41a;
+    --warning-color: #faad14;
+    --error-color: #ff4d4f;
+    --info-color: #007bff;
+  }
+
+  [data-theme="dark"] {
+    /* Dark Theme - SIH Files Color Scheme */
+    --bg-primary: #121b27;
+    --bg-secondary: #1a232f;
+    --bg-tertiary: #2c2c3e;
+    --text-primary: #e0e3e6;
+    --text-secondary: #a0a8b4;
+    --text-muted: #6b7280;
+    --accent-primary: #00b0ff;
+    --accent-secondary: #40c4ff;
+    --accent-hover: #007bff;
+    --border-color: #444;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.5);
+    --gradient-primary: linear-gradient(135deg, #00b0ff 0%, #007bff 100%);
+    --gradient-secondary: linear-gradient(135deg, #40c4ff 0%, #00b0ff 100%);
+    --success-color: #52c41a;
+    --warning-color: #faad14;
+    --error-color: #ff4d4f;
+    --info-color: #00b0ff;
+  }
+
+  /* ====== Base ====== */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    line-height: 1.6;
+  }
+  
+  a { 
+    text-decoration: none; 
+    color: inherit; 
+    transition: all 0.2s ease;
+  }
+
+  /* ====== Navigation ====== */
+  nav {
+    background: var(--bg-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow-medium);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  nav .logo {
+    font-weight: 800;
+    font-size: 1.8rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  nav .logo:hover {
+    transform: scale(1.05);
+  }
+  
+  nav .slogan {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+  
+  .nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    max-width: 400px;
+  }
+  
+  nav .search-bar {
+    position: relative;
+    width: 100%;
+  }
+  
+  nav .search-bar input {
+    padding: 0.75rem 1.5rem 0.75rem 3rem;
+    border-radius: 25px;
+    border: 2px solid var(--border-color);
+    width: 100%;
+    font-size: 0.95rem;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+  }
+  
+  nav .search-bar input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: var(--bg-secondary);
+  }
+  
+  nav .search-bar::before {
+    content: "🔍";
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
+  
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .theme-toggle {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  
+  .theme-toggle:hover {
+    background: var(--accent-primary);
+    color: white;
+    transform: scale(1.1);
+  }
+  
+  nav .location-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+  }
+  
+  nav .location-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  /* ====== Layout ====== */
+  .container {
+    display: flex;
+    justify-content: center;
+    max-width: 1400px;
+    margin: 2rem auto;
+    gap: 2rem;
+    padding: 0 1.5rem;
+  }
+  
+  .sidebar, .rightbar {
+    flex: 0 0 220px;
+    height: fit-content;
+  }
+  
+  .feed {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ====== Sidebar ====== */
+  .sidebar, .rightbar {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    padding: 1.5rem;
+    position: sticky;
+    top: 100px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+  }
+  
+  .sidebar:hover, .rightbar:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+  }
+  
+  .sidebar h3, .rightbar h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .sidebar-item, .rightbar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  
+  .sidebar-item:hover, .rightbar-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transform: translateX(5px);
+  }
+  
+  .sidebar-item.active {
+    background: var(--accent-primary);
+    color: white;
+  }
+  
+  .sidebar-item .icon, .rightbar-item .icon {
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+  }
+
+  /* ====== Feed Grid ====== */
+  .feed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  /* ====== Report Box ====== */
+  .report-box {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+  }
+
+  .report-box.sticky {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-heavy);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  [data-theme="dark"] .report-box.sticky {
+    background: rgba(26, 35, 47, 0.95);
+  }
+  
+  .report-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-heavy);
+  }
+  
+  .report-box h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .report-box textarea,
+  .report-box input[type="text"] {
+    width: 100%;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  .report-box textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  .report-box textarea:focus,
+  .report-box input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: var(--bg-secondary);
+  }
+  
+  .file-upload {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  
+  .file-upload input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+  
+  .file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  
+  .file-upload-label:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+  
+  /* ====== Image Preview ====== */
+  .image-preview-container {
+    margin-top: 1rem;
+    display: none;
+  }
+
+  .image-preview {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .image-preview img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-light);
+  }
+
+  .image-preview-remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 77, 79, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+  }
+
+  .image-preview-remove:hover {
+    background: rgba(255, 77, 79, 1);
+    transform: scale(1.1);
+  }
+  
+  .report-box button {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    width: 100%;
+  }
+  
+  .report-box button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .report-box button:active {
+    transform: translateY(0);
+  }
+
+  /* ====== Reports ====== */
+  .report {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .report::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .report:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-heavy);
+  }
+  
+  .report:hover::before {
+    transform: scaleX(1);
+  }
+
+  .report-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+  }
+  
+  .report:hover .avatar {
+    transform: scale(1.1);
+  }
+  
+  .user-info {
+    flex: 1;
+  }
+  
+  .user-info strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  
+  .timer {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .report-content {
+    margin-bottom: 1rem;
+  }
+  
+  .report-content p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .report img {
+    width: 100%;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .report:hover img {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-medium);
+  }
+
+  /* Loading state for images */
+  .report img[src=""], .nearby-item img[src=""] {
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .report img[src=""]:before {
+    content: "🖼️ Loading...";
+  }
+
+  /* ====== Geotag Overlay ====== */
+  .image-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .geotag-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 200px;
+    word-wrap: break-word;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+
+  .geotag-overlay:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.05);
+  }
+
+  .geotag-icon {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .geotag-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .report-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .report-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+  }
+  
+  .stat-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+  
+  .rating-btn {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .rating-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  /* ====== Modals ====== */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+  }
+  
+  .modal-content {
+    background: var(--bg-secondary);
+    padding: 2.5rem;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 450px;
+    animation: modalFadeIn 0.4s ease-out;
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid var(--border-color);
+  }
+  
+  .modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .stars { 
+    display: flex; 
+    justify-content: center; 
+    gap: 0.75rem; 
+    margin: 2rem 0; 
+  }
+  
+  .stars span { 
+    font-size: 2.5rem; 
+    cursor: pointer; 
+    color: var(--text-muted); 
+    transition: all 0.3s ease;
+    padding: 0.25rem;
+    border-radius: 50%;
+  }
+  
+  .stars span:hover {
+    transform: scale(1.2);
+  }
+  
+  .stars span.active, .stars span:hover { 
+    color: #fbbf24; 
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  }
+  
+  .close-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .close-btn:hover { 
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  @keyframes modalFadeIn { 
+    from { 
+      opacity: 0; 
+      transform: scale(0.8) translateY(-20px); 
+    } 
+    to { 
+      opacity: 1; 
+      transform: scale(1) translateY(0); 
+    } 
+  }
+
+  /* ====== Loading Animation ====== */
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--border-color);
+    border-radius: 50%;
+    border-top-color: var(--accent-primary);
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ====== Responsive ====== */
+  @media(max-width: 1200px) {
+    .container { 
+      max-width: 1000px;
+      gap: 1.5rem;
+    }
+    .sidebar, .rightbar { 
+      flex: 0 0 200px;
+    }
+  }
+  
+  @media(max-width: 1024px) {
+    .container { 
+      flex-direction: column; 
+      gap: 1rem;
+    }
+    .sidebar, .rightbar { 
+      width: 100%; 
+      max-width: 100%; 
+      position: relative; 
+      top: 0; 
+      margin-bottom: 1rem;
+      flex: none;
+    }
+    .feed-grid { 
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    nav {
+      padding: 0.75rem 1rem;
+    }
+    .nav-center {
+      max-width: 300px;
+    }
+  }
+  
+  @media(max-width: 768px) {
+    .feed-grid { 
+      grid-template-columns: 1fr;
+    }
+    .nav-center {
+      display: none;
+    }
+    .report-box {
+      padding: 1.5rem;
+    }
+    .modal-content {
+      padding: 2rem;
+      margin: 1rem;
+    }
+  }
+  
+  @media(max-width: 480px) {
+    .container {
+      padding: 0 1rem;
+    }
+    .report-box {
+      padding: 1rem;
+    }
+    .report {
+      padding: 1rem;
+    }
+  }
+
+  /* ====== Page Navigation ====== */
+  .page-content {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .page-header h2 {
+    color: var(--text-primary);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+  }
+
+  /* ====== Location Input ====== */
+  .location-input {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .location-input input {
+    flex: 1;
+    min-width: 300px;
+  }
+
+  .location-input button {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .location-input button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .location-input button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ====== Achievements & Leaderboard Page ====== */
+  .your-stats-section {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .your-stats-section h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-light);
+    border-color: var(--accent-primary);
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+  }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--accent-primary);
+    line-height: 1;
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .progress-section {
+    background: var(--bg-tertiary);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .progress-label {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .progress-value {
+    font-weight: bold;
+    color: var(--accent-primary);
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 12px;
+    background: var(--bg-primary);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+  }
+
+  .progress-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .podium-section {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .podium-section h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .podium-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 16px;
+    color: white;
+    text-align: center;
+    position: relative;
+    box-shadow: var(--shadow-medium);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 150px;
+  }
+
+  .podium-card:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: var(--shadow-large);
+  }
+
+  .podium-card.first {
+    background: linear-gradient(135deg, #ffdc00, #ff9a00);
+    height: 200px;
+    order: 2;
+  }
+
+  .podium-card.second {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    height: 160px;
+    order: 1;
+  }
+
+  .podium-card.third {
+    background: linear-gradient(135deg, #00b0ff, #007bff);
+    height: 140px;
+    order: 3;
+  }
+
+  .podium-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid white;
+    margin-bottom: 0.5rem;
+  }
+
+  .podium-card h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .podium-card .points {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .leaderboard-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .tab-btn {
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 25px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+  }
+
+  .tab-btn.active {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: var(--accent-primary);
+  }
+
+  .tab-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+  }
+
+  .leaderboard-section {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .leaderboard-list {
+    display: none;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .leaderboard-list.active {
+    display: flex;
+  }
+
+  .leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+  }
+
+  .leaderboard-item:hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow-light);
+    border-color: var(--accent-primary);
+  }
+
+  .leaderboard-item .rank {
+    font-weight: bold;
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+    min-width: 40px;
+  }
+
+  .leaderboard-item .name {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    margin-left: 1rem;
+  }
+
+  .leaderboard-item .points {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .achievement-card {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+  }
+
+  .achievement-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  .achievement-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+  }
+
+  .achievement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+  }
+
+  .achievement-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+  }
+
+  .achievement-content h4 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .achievement-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .trend-chart {
+    height: 200px;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  /* ====== Analytics Page ====== */
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+
+  .analytics-card {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+  }
+
+  .analytics-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .chart-container {
+    background: var(--bg-tertiary);
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .metrics-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .metric-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .metric-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  /* ====== Profile Page ====== */
+  .profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .profile-card {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+  }
+
+  .profile-picture {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .profile-picture img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--accent-primary);
+    margin-bottom: 1rem;
+  }
+
+  .change-pic-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .change-pic-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .identity-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+
+  .verified-badge {
+    color: #10b981;
+    font-weight: 600;
+  }
+
+  .save-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+  }
+
+  .save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  /* ====== Settings Page ====== */
+  .settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .settings-card {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+  }
+
+  .settings-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .setting-item {
+    margin-bottom: 1.5rem;
+  }
+
+  .setting-item label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .setting-item select,
+  .setting-item input[type="range"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 1rem;
+  }
+
+  .setting-item input[type="range"] {
+    padding: 0;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+  }
+
+  .save-settings-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    width: 100%;
+  }
+
+  .save-settings-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  /* ====== Nearby Issues ====== */
+  .nearby-issues {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nearby-item {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .nearby-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .issue-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .issue-preview img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+  }
+
+  .issue-preview img:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .nearby-issue-img {
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+  }
+
+  .nearby-issue-img:before {
+    content: "🖼️";
+  }
+
+  .issue-info {
+    flex: 1;
+  }
+
+  .issue-title {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .issue-distance {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .issue-details {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .issue-details p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .status-pending {
+    color: var(--warning-color);
+    font-weight: 600;
+  }
+
+  .status-in-progress {
+    color: var(--info-color);
+    font-weight: 600;
+  }
+
+  .status-resolved {
+    color: var(--success-color);
+    font-weight: 600;
+  }
+
+  .view-issue-btn {
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .view-issue-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+  }
+
+  /* ====== Citizen Stats Card ====== */
+  .citizen-stats-card {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+    text-align: center;
+  }
+
+  .citizen-stats-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .citizen-stats-card .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .citizen-stats-card .stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+  }
+
+  .citizen-stats-card .stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .citizen-stats-card .stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .progress-container {
+    margin-top: 1rem;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gradient-primary);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  .progress-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ====== My Reports Section ====== */
+  .my-reports-section {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .my-reports-section h3 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+  }
+
+  .my-reports-section table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .my-reports-section th,
+  .my-reports-section td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .my-reports-section th {
+    background: var(--gradient-primary);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .my-reports-section tr:hover {
+    background: var(--bg-tertiary);
+    transition: all 0.3s ease;
+  }
+
+  .my-reports-section .issue-img {
+    width: 60px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: var(--shadow-light);
+  }
+
+  .my-reports-section .status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: white;
+    display: inline-block;
+  }
+
+  .my-reports-section .status-pending {
+    background: var(--warning-color);
+  }
+
+  .my-reports-section .status-in-progress {
+    background: var(--info-color);
+  }
+
+  .my-reports-section .status-resolved {
+    background: var(--success-color);
+  }
+
+  .my-reports-section .status-open {
+    background: var(--error-color);
+  }
+
+  .my-reports-section .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .my-reports-section .action-btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .my-reports-section .action-btn.view {
+    background: var(--accent-primary);
+    color: white;
+  }
+
+  .my-reports-section .action-btn.edit {
+    background: var(--warning-color);
+    color: white;
+  }
+
+  .my-reports-section .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+  }
+
+  /* ====== Responsive Design for New Components ====== */
+  @media(max-width: 768px) {
+    .achievements-grid,
+    .analytics-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .user-stats {
+      grid-template-columns: 1fr;
+    }
+    
+    .citizen-stats-card .stats-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .profile-container,
+    .settings-container {
+      padding: 0 1rem;
+    }
+
+    .my-reports-section {
+      padding: 1rem;
+    }
+
+    .my-reports-section table {
+      font-size: 0.8rem;
+    }
+
+    .my-reports-section th,
+    .my-reports-section td {
+      padding: 0.5rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <div class="logo">Nivaran</div>
+      <div class="slogan">Shikayat Se Samadhan Tak</div>
+    </div>
+    <div class="nav-center">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search reports...">
+      </div>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+      <button class="location-btn" onclick="window.location.href='myarea.html'">📍 Nearby Issues</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="sidebar">
+      <h3>🚀 Quick Links</h3>
+      <div class="sidebar-item active" onclick="showPage('main')">
+        <span class="icon">🏠</span>
+        <span>Home</span>
+      </div>
+      <div class="sidebar-item" onclick="scrollToReportForm()">
+        <span class="icon">📝</span>
+        <span>Quick Report</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('achievements')">
+        <span class="icon">🏆</span>
+        <span>Achievements</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('analytics')">
+        <span class="icon">📊</span>
+        <span>Analytics</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('profile')">
+        <span class="icon">👤</span>
+        <span>Profile</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('settings')">
+        <span class="icon">⚙️</span>
+        <span>Settings</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='myarea.html'">
+        <span class="icon">🗺️</span>
+        <span>My Area</span>
+      </div>
+      <div class="sidebar-item" onclick="logout()">
+        <span class="icon">🚪</span>
+        <span>Logout</span>
+      </div>
+    </div>
+
+    <div class="feed">
+      <!-- Main Dashboard Page -->
+      <div id="main-page" class="page-content">
+        <!-- Citizen Stats -->
+        <div class="citizen-stats-card">
+          <h3>🏆 Your Citizen Stats</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-number" id="citizenPointsDisplay">0</span>
+              <span class="stat-label">Citizen Points</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="citizenLevelDisplay">1</span>
+              <span class="stat-label">Level</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="citizenRankDisplay">#0</span>
+              <span class="stat-label">Rank</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="reportsSubmittedDisplay">0</span>
+              <span class="stat-label">Reports Submitted</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="verifiedReportsDisplay">0</span>
+              <span class="stat-label">Verified Reports</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="resolvedIssuesDisplay">0</span>
+              <span class="stat-label">Resolved Issues</span>
+            </div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="levelProgress"></div>
+            </div>
+            <span class="progress-text" id="progressText">0 / 100 points to next level</span>
+          </div>
+        </div>
+
+        <!-- Post Box -->
+        <div class="report-box">
+          <h3>📝 Report New Issue</h3>
+          <form id="reportForm">
+            <div class="form-group">
+              <label for="title">Issue Title</label>
+              <input type="text" id="title" placeholder="Enter a descriptive title..." required>
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" placeholder="Describe the issue in detail..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="image">Upload Image (Optional)</label>
+              <div class="file-upload">
+                <input type="file" id="image" accept="image/*">
+                <label for="image" class="file-upload-label">
+                  <span>📷</span>
+                  <span>Choose Image or Drag & Drop</span>
+                </label>
+              </div>
+              <div class="image-preview-container" id="imagePreviewContainer">
+                <div class="image-preview">
+                  <img id="imagePreview" src="" alt="Image preview">
+                  <button type="button" class="image-preview-remove" id="removeImagePreview">×</button>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="location">Location</label>
+              <div class="location-input">
+                <input type="text" id="location" placeholder="Click to get your current location or enter manually..." readonly>
+                <button type="button" id="getLocationBtn" onclick="getCurrentLocation()">📍 Get Location</button>
+                <button type="button" id="manualLocationBtn" onclick="enableManualLocation()">✏️ Enter Manually</button>
+              </div>
+            </div>
+            <button type="submit">🚀 Post Issue</button>
+          </form>
+        </div>
+
+        <!-- My Reports Section -->
+        <div class="my-reports-section">
+          <h3>📋 My Reported Issues</h3>
+          <div class="table-container">
+            <table id="myReportsTable">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Location</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="myReportsTableBody">
+                <!-- Reports will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Feed Grid -->
+        <div class="feed-grid" id="reports"></div>
+      </div>
+
+      <!-- Achievements Page -->
+      <div id="achievements-page" class="page-content" style="display: none;">
+        <div class="page-header">
+          <h2>🏆 Achievements & Leaderboard</h2>
+          <p>Track your progress and see who's making the biggest impact in solving civic issues</p>
+        </div>
+
+        <!-- Your Stats Section -->
+        <div class="your-stats-section">
+          <h3>🌟 Your Performance</h3>
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-icon">📊</div>
+              <div class="stat-content">
+                <span class="stat-number" id="userRank">#12</span>
+                <span class="stat-label">Current Rank</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📝</div>
+              <div class="stat-content">
+                <span class="stat-number" id="userReports">0</span>
+                <span class="stat-label">Reports Posted</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">✅</div>
+              <div class="stat-content">
+                <span class="stat-number" id="userResolved">0</span>
+                <span class="stat-label">Issues Resolved</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">⭐</div>
+              <div class="stat-content">
+                <span class="stat-number" id="userRating">0.0</span>
+                <span class="stat-label">Average Rating</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Progress Bar -->
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label">Citizen Points Progress</span>
+              <span class="progress-value" id="progressValue">450 / 500</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: 90%"></div>
+            </div>
+            <div class="progress-text" id="progressText">50 points to next level!</div>
+          </div>
+        </div>
+
+        <!-- Podium Section -->
+        <div class="podium-section">
+          <h3>🏆 Top Performers</h3>
+          <div class="podium" id="podium">
+            <!-- Podium will be populated here -->
+          </div>
+        </div>
+
+        <!-- Leaderboard Tabs -->
+        <div class="leaderboard-tabs">
+          <button class="tab-btn active" onclick="switchLeaderboardTab('monthly')">Monthly</button>
+          <button class="tab-btn" onclick="switchLeaderboardTab('alltime')">All-Time</button>
+        </div>
+
+        <!-- Leaderboard Lists -->
+        <div class="leaderboard-section">
+          <div class="leaderboard-list active" id="monthlyLeaderboard">
+            <!-- Monthly leaderboard will be populated here -->
+          </div>
+          <div class="leaderboard-list" id="alltimeLeaderboard">
+            <!-- All-time leaderboard will be populated here -->
+          </div>
+        </div>
+
+        <!-- Achievements Grid -->
+        <div class="achievements-grid">
+          <div class="achievement-card">
+            <h3>🎯 Recent Achievements</h3>
+            <div class="achievement-list" id="achievementList">
+              <!-- Achievements will be populated here -->
+            </div>
+          </div>
+
+          <div class="achievement-card">
+            <h3>📈 Performance Trends</h3>
+            <div class="trend-chart" id="trendChart">
+              <!-- Trend chart will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Page -->
+      <div id="analytics-page" class="page-content" style="display: none;">
+        <div class="page-header">
+          <h2>📊 Analytics Dashboard</h2>
+          <p>Track the impact of civic issue resolution</p>
+        </div>
+        
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h3>📈 Resolution Trends</h3>
+            <div class="chart-container">
+              <canvas id="resolutionChart" width="400" height="200"></canvas>
+            </div>
+          </div>
+          
+          <div class="analytics-card">
+            <h3>🎯 Impact Metrics</h3>
+            <div class="metrics-grid">
+              <div class="metric-item">
+                <span class="metric-number" id="totalResolved">0</span>
+                <span class="metric-label">Total Issues Resolved</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-number" id="avgResolutionTime">0</span>
+                <span class="metric-label">Avg. Resolution Time (days)</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-number" id="userSatisfaction">0%</span>
+                <span class="metric-label">User Satisfaction Rate</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Page -->
+      <div id="profile-page" class="page-content" style="display: none;">
+        <div class="page-header">
+          <h2>👤 Profile Settings</h2>
+          <p>Manage your account information</p>
+        </div>
+        
+        <div class="profile-container">
+          <div class="profile-card">
+            <div class="profile-picture">
+              <img id="profileImg" src="https://via.placeholder.com/150" alt="Profile Picture">
+              <button onclick="changeProfilePicture()" class="change-pic-btn">📷 Change Picture</button>
+            </div>
+            
+            <form id="profileForm" class="profile-form">
+              <div class="form-group">
+                <label for="profileEmail">Email Address</label>
+                <input type="email" id="profileEmail" placeholder="your.email@example.com">
+              </div>
+              
+              <div class="form-group">
+                <label for="currentPassword">Current Password</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+              </div>
+              
+              <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+              </div>
+              
+              <div class="form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+              </div>
+              
+              <div class="form-group">
+                <label>Identity Verification (Read Only)</label>
+                <div class="identity-info">
+                  <span>🆔 Aadhar Card: ****1234 (Verified via DigiLocker)</span>
+                  <span class="verified-badge">✅ Verified</span>
+                </div>
+              </div>
+              
+              <button type="submit" class="save-btn">💾 Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div id="settings-page" class="page-content" style="display: none;">
+        <div class="page-header">
+          <h2>⚙️ Settings</h2>
+          <p>Customize your experience</p>
+        </div>
+        
+        <div class="settings-container">
+          <div class="settings-card">
+            <h3>🌐 Language & Region</h3>
+            <div class="setting-item">
+              <label for="language">Language</label>
+              <select id="language">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="ta">தமிழ்</option>
+                <option value="te">తెలుగు</option>
+              </select>
+            </div>
+            
+            <div class="setting-item">
+              <label for="region">Region</label>
+              <select id="region">
+                <option value="delhi">Delhi</option>
+                <option value="mumbai">Mumbai</option>
+                <option value="bangalore">Bangalore</option>
+                <option value="chennai">Chennai</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="settings-card">
+            <h3>🎨 Display Settings</h3>
+            <div class="setting-item">
+              <label for="fontSize">Font Size</label>
+              <input type="range" id="fontSize" min="12" max="20" value="16">
+              <span id="fontSizeValue">16px</span>
+            </div>
+            
+            <div class="setting-item">
+              <label for="theme">Theme</label>
+              <select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="auto">Auto (System)</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="settings-card">
+            <h3>🔔 Notifications</h3>
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="emailNotifications" checked>
+                <span>Email notifications for issue updates</span>
+              </label>
+            </div>
+            
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="pushNotifications" checked>
+                <span>Push notifications</span>
+              </label>
+            </div>
+          </div>
+          
+          <button onclick="saveSettings()" class="save-settings-btn">💾 Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rightbar">
+      <h3>📍 Nearby Issues</h3>
+      <div class="nearby-issues" id="nearbyIssues">
+        <div class="nearby-item" data-issue-id="1">
+          <div class="issue-preview">
+            <img src="https://picsum.photos/60/60?random=10" alt="Pothole" class="nearby-issue-img">
+            <div class="issue-info">
+              <span class="issue-title">Pothole near Main Street</span>
+              <span class="issue-distance">0.2 km away</span>
+            </div>
+          </div>
+          <div class="issue-details" style="display: none;">
+            <p><strong>Description:</strong> Large pothole causing vehicle damage</p>
+            <p><strong>Location:</strong> Main Street, Block A</p>
+            <p><strong>Reported:</strong> 2 hours ago</p>
+            <p><strong>Status:</strong> <span class="status-pending">Pending</span></p>
+            <button class="view-issue-btn">View Full Report</button>
+          </div>
+        </div>
+        
+        <div class="nearby-item" data-issue-id="2">
+          <div class="issue-preview">
+            <img src="https://picsum.photos/60/60?random=11" alt="Garbage" class="nearby-issue-img">
+            <div class="issue-info">
+              <span class="issue-title">Overflowing garbage bin</span>
+              <span class="issue-distance">0.5 km away</span>
+            </div>
+          </div>
+          <div class="issue-details" style="display: none;">
+            <p><strong>Description:</strong> Garbage bin overflowing for 3 days</p>
+            <p><strong>Location:</strong> Park Avenue, Block B</p>
+            <p><strong>Reported:</strong> 1 day ago</p>
+            <p><strong>Status:</strong> <span class="status-in-progress">In Progress</span></p>
+            <button class="view-issue-btn">View Full Report</button>
+          </div>
+        </div>
+        
+        <div class="nearby-item" data-issue-id="3">
+          <div class="issue-preview">
+            <img src="https://picsum.photos/60/60?random=12" alt="Streetlight" class="nearby-issue-img">
+            <div class="issue-info">
+              <span class="issue-title">Broken streetlight</span>
+              <span class="issue-distance">0.8 km away</span>
+            </div>
+          </div>
+          <div class="issue-details" style="display: none;">
+            <p><strong>Description:</strong> Streetlight not working, dark area</p>
+            <p><strong>Location:</strong> Library Road, Block C</p>
+            <p><strong>Reported:</strong> 3 days ago</p>
+            <p><strong>Status:</strong> <span class="status-resolved">Resolved</span></p>
+            <button class="view-issue-btn">View Full Report</button>
+          </div>
+        </div>
+        
+        <div class="nearby-item" data-issue-id="4">
+          <div class="issue-preview">
+            <img src="https://picsum.photos/60/60?random=13" alt="Construction" class="nearby-issue-img">
+            <div class="issue-info">
+              <span class="issue-title">Construction blocking sidewalk</span>
+              <span class="issue-distance">1.2 km away</span>
+            </div>
+          </div>
+          <div class="issue-details" style="display: none;">
+            <p><strong>Description:</strong> Construction materials blocking pedestrian path</p>
+            <p><strong>Location:</strong> Central Avenue, Block D</p>
+            <p><strong>Reported:</strong> 5 hours ago</p>
+            <p><strong>Status:</strong> <span class="status-pending">Pending</span></p>
+            <button class="view-issue-btn">View Full Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating Modal -->
+  <div class="modal" id="ratingModal">
+    <div class="modal-content">
+      <h2>Rate this Report</h2>
+      <div class="stars" id="starContainer">
+        <span data-value="1">★</span>
+        <span data-value="2">★</span>
+        <span data-value="3">★</span>
+        <span data-value="4">★</span>
+        <span data-value="5">★</span>
+      </div>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- Comment Modal -->
+  <div class="modal" id="commentModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <h2>💬 Comments</h2>
+      <div id="commentsContainer" style="max-height: 300px; overflow-y: auto; margin: 1rem 0; padding: 1rem; background: var(--bg-tertiary); border-radius: 8px;">
+        <!-- Comments will be populated here -->
+      </div>
+      <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+        <input type="text" id="commentInput" placeholder="Write a comment..." style="flex: 1; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-tertiary); color: var(--text-primary);">
+        <button onclick="postComment()" style="background: var(--gradient-primary); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 600;">Post</button>
+      </div>
+      <button class="close-btn" onclick="closeCommentModal()" style="margin-top: 1rem;">Close</button>
+    </div>
+  </div>
+
+<script>
+// ====== GLOBAL VARIABLES ======
+const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+const reportForm = document.getElementById('reportForm');
+const reportsContainer = document.getElementById('reports');
+const modal = document.getElementById('ratingModal');
+const starContainer = document.getElementById('starContainer');
+const searchInput = document.getElementById('searchInput');
+let currentReport = null;
+let currentPage = 'main';
+let userLocation = null;
+let currentCommentReport = null;
+let comments = {}; // Store comments by report ID
+let userStats = {
+  reportsPosted: 0,
+  issuesResolved: 0,
+  verifiedReports: 0,
+  averageRating: 0.0,
+  citizenPoints: 0,
+  level: 1,
+  rank: 0
+};
+
+let myReports = []; // Array to store user's reports
+
+// ====== THEME MANAGEMENT ======
+const currentTheme = localStorage.getItem('theme') || 'light';
+body.setAttribute('data-theme', currentTheme);
+updateThemeIcon(currentTheme);
+
+function toggleTheme() {
+  const currentTheme = body.getAttribute('data-theme');
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  
+  body.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+  themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
+// ====== PAGE NAVIGATION ======
+function showPage(pageName) {
+  // Hide all pages
+  document.querySelectorAll('.page-content').forEach(page => {
+    page.style.display = 'none';
+  });
+  
+  // Show selected page
+  document.getElementById(pageName + '-page').style.display = 'block';
+  
+  // Update active sidebar item
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // Add active class to clicked item
+  const clickedItem = event.target.closest('.sidebar-item');
+  if (clickedItem) {
+    clickedItem.classList.add('active');
+  }
+  
+  // Update current page
+  currentPage = pageName;
+  
+  // Load page-specific data
+  if (pageName === 'achievements') {
+    loadAchievements();
+  } else if (pageName === 'analytics') {
+    loadAnalytics();
+  } else if (pageName === 'profile') {
+    loadProfile();
+  } else if (pageName === 'settings') {
+    loadSettings();
+  }
+}
+
+// ====== LOCATION SERVICES ======
+function getCurrentLocation() {
+  if (navigator.geolocation) {
+    const locationBtn = document.getElementById('getLocationBtn');
+    const manualBtn = document.getElementById('manualLocationBtn');
+    locationBtn.textContent = '📍 Getting Location...';
+    locationBtn.disabled = true;
+    manualBtn.disabled = true;
+    
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        userLocation = { lat, lng };
+        
+        // Reverse geocoding to get address
+        getAddressFromCoords(lat, lng);
+        
+        locationBtn.textContent = '✅ Location Set';
+        locationBtn.style.background = 'var(--success-color)';
+        manualBtn.disabled = false;
+      },
+      function(error) {
+        alert('Unable to get your location. Please use the "Enter Manually" button to type your location.');
+        locationBtn.textContent = '📍 Get Location';
+        locationBtn.disabled = false;
+        manualBtn.disabled = false;
+      }
+    );
+  } else {
+    alert('Geolocation is not supported by this browser. Please use the "Enter Manually" button to type your location.');
+  }
+}
+
+function enableManualLocation() {
+  const locationInput = document.getElementById('location');
+  const getLocationBtn = document.getElementById('getLocationBtn');
+  const manualBtn = document.getElementById('manualLocationBtn');
+  
+  // Enable manual input
+  locationInput.removeAttribute('readonly');
+  locationInput.focus();
+  locationInput.placeholder = 'Enter your location manually...';
+  
+  // Update button states
+  getLocationBtn.disabled = true;
+  manualBtn.textContent = '✅ Save Location';
+  manualBtn.onclick = saveManualLocation;
+  
+  // Add event listener for Enter key
+  locationInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      saveManualLocation();
+    }
+  });
+  
+  console.log('Manual location input enabled');
+}
+
+function saveManualLocation() {
+  const locationInput = document.getElementById('location');
+  const getLocationBtn = document.getElementById('getLocationBtn');
+  const manualBtn = document.getElementById('manualLocationBtn');
+  
+  if (locationInput.value.trim()) {
+    // Set user location as manual entry
+    userLocation = { manual: true, address: locationInput.value.trim() };
+    
+    // Update UI
+    locationInput.setAttribute('readonly', 'true');
+    locationInput.style.background = 'var(--success-color)';
+    locationInput.style.color = 'white';
+    
+    getLocationBtn.disabled = false;
+    manualBtn.textContent = '✏️ Edit Location';
+    manualBtn.onclick = enableManualLocation;
+    
+    // Show success message
+    alert('Location saved successfully!');
+    console.log('Manual location saved:', locationInput.value.trim());
+  } else {
+    alert('Please enter a valid location.');
+  }
+}
+
+function getAddressFromCoords(lat, lng) {
+  // Using a simple reverse geocoding service
+  fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
+    .then(response => response.json())
+    .then(data => {
+      const address = `${data.locality}, ${data.principalSubdivision}, ${data.countryName}`;
+      document.getElementById('location').value = address;
+    })
+    .catch(error => {
+      document.getElementById('location').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+    });
+}
+
+// ====== FORM AND REPORT MANAGEMENT ======
+window.addEventListener('load', () => {
+  addSampleReports();
+  loadUserStats();
+  initImagePreview();
+  loadRandomImages();
+});
+
+// ====== IMAGE PREVIEW FUNCTIONALITY ======
+function initImagePreview() {
+  const imageInput = document.getElementById('image');
+  const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+  const imagePreview = document.getElementById('imagePreview');
+  const removeImagePreview = document.getElementById('removeImagePreview');
+
+  imageInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.src = e.target.result;
+        imagePreviewContainer.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  removeImagePreview.addEventListener('click', function() {
+    imageInput.value = '';
+    imagePreview.src = '';
+    imagePreviewContainer.style.display = 'none';
+  });
+}
+
+// ====== RANDOM IMAGE API INTEGRATION ======
+async function loadRandomImages() {
+  try {
+    // Load random images for sample reports
+    await loadRandomImagesForReports();
+    
+    // Load random images for nearby issues
+    await loadRandomImagesForNearbyIssues();
+  } catch (error) {
+    console.log('Using fallback images due to API error:', error);
+    // Fallback to placeholder images if API fails
+  }
+}
+
+async function loadRandomImagesForReports() {
+  const reports = document.querySelectorAll('.report img');
+  for (let i = 0; i < reports.length; i++) {
+    try {
+      const randomImage = await getRandomImage();
+      if (randomImage) {
+        reports[i].src = randomImage;
+      }
+    } catch (error) {
+      console.log('Failed to load random image for report:', error);
+    }
+  }
+}
+
+async function loadRandomImagesForNearbyIssues() {
+  const nearbyImages = document.querySelectorAll('.nearby-issue-img');
+  for (let i = 0; i < nearbyImages.length; i++) {
+    try {
+      const randomImage = await getRandomImage();
+      if (randomImage) {
+        nearbyImages[i].src = randomImage;
+      }
+    } catch (error) {
+      console.log('Failed to load random image for nearby issue:', error);
+    }
+  }
+}
+
+async function getRandomImage() {
+  try {
+    // Using Unsplash API for random images
+    const response = await fetch('https://source.unsplash.com/400x250/?city,street,infrastructure,construction');
+    if (response.ok) {
+      return response.url;
+    }
+  } catch (error) {
+    console.log('Unsplash API failed, trying alternative...');
+  }
+
+  try {
+    // Fallback to Picsum API
+    const response = await fetch('https://picsum.photos/400/250?random=' + Math.random());
+    if (response.ok) {
+      return response.url;
+    }
+  } catch (error) {
+    console.log('Picsum API also failed');
+  }
+
+  // Final fallback to placeholder
+  return null;
+}
+
+async function loadRandomImageForReport(reportElement) {
+  try {
+    const randomImage = await getRandomImage();
+    if (randomImage) {
+      const imgElement = reportElement.querySelector('img');
+      if (imgElement) {
+        imgElement.src = randomImage;
+      }
+    }
+  } catch (error) {
+    console.log('Failed to load random image for new report:', error);
+  }
+}
+
+function addSampleReports() {
+  const sampleReports = [
+    {
+      title: "Broken Traffic Light",
+      description: "The traffic light at the intersection of Main St and Oak Ave has been stuck on red for 3 days, causing major traffic congestion during rush hours.",
+      image: "https://picsum.photos/400/250?random=1",
+      likes: 12,
+      comments: 3,
+      location: "Main St & Oak Ave",
+      status: "resolved",
+      userRating: 4.5
+    },
+    {
+      title: "Pothole on Highway 101",
+      description: "Large pothole on the right lane of Highway 101 near exit 15. It's getting deeper and could cause vehicle damage.",
+      image: "https://picsum.photos/400/250?random=2",
+      likes: 8,
+      comments: 1,
+      location: "Highway 101, Exit 15",
+      status: "in-progress",
+      userRating: 4.2
+    },
+    {
+      title: "Street Light Out",
+      description: "Street light on Elm Street between blocks 200-300 is completely dark, making it unsafe for pedestrians at night.",
+      image: "https://picsum.photos/400/250?random=3",
+      likes: 15,
+      comments: 5,
+      location: "Elm Street, Block 200-300",
+      status: "pending",
+      userRating: 4.8
+    }
+  ];
+
+  sampleReports.forEach((reportData, index) => {
+    const report = createReportElement(reportData, Date.now() - (index * 3600000));
+    reportsContainer.appendChild(report);
+  });
+}
+
+reportForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const title = document.getElementById('title').value;
+  const description = document.getElementById('description').value;
+  const imageFile = document.getElementById('image').files[0];
+  const location = document.getElementById('location').value;
+
+  if (!location) {
+    alert('Please set your location before posting the issue.');
+    return;
+  }
+
+  // Check if location is manually entered
+  if (userLocation && userLocation.manual) {
+    location = userLocation.address;
+  }
+
+  const reportData = {
+    title,
+    description,
+    image: imageFile || null,
+    likes: 0,
+    comments: 0,
+    location,
+    status: "pending",
+    userRating: 0
+  };
+
+  const report = createReportElement(reportData, Date.now());
+  reportsContainer.prepend(report);
+  
+  // Add to my reports
+  addToMyReports(reportData);
+  
+  reportForm.reset();
+  
+  // Reset image preview
+  const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+  const imagePreview = document.getElementById('imagePreview');
+  imagePreviewContainer.style.display = 'none';
+  imagePreview.src = '';
+  
+  userLocation = null;
+  
+  // Reset location buttons
+  const locationInput = document.getElementById('location');
+  const getLocationBtn = document.getElementById('getLocationBtn');
+  const manualBtn = document.getElementById('manualLocationBtn');
+  
+  locationInput.setAttribute('readonly', 'true');
+  locationInput.style.background = '';
+  locationInput.style.color = '';
+  locationInput.placeholder = 'Click to get your current location or enter manually...';
+  
+  getLocationBtn.textContent = '📍 Get Location';
+  getLocationBtn.style.background = '';
+  getLocationBtn.disabled = false;
+  
+  manualBtn.textContent = '✏️ Enter Manually';
+  manualBtn.disabled = false;
+  manualBtn.onclick = enableManualLocation;
+  
+  // Update user stats
+  userStats.reportsPosted++;
+  userStats.citizenPoints += 10; // Award 10 points for posting a report
+  userStats.level = Math.floor(userStats.citizenPoints / 100) + 1;
+  updateUserStats();
+  updateCitizenStats();
+  
+  // Show success animation
+  report.style.animation = 'modalFadeIn 0.5s ease-out';
+});
+
+function createReportElement(reportData, timestamp) {
+  const report = document.createElement('div');
+  report.classList.add('report');
+  report.dataset.timestamp = timestamp;
+  report.dataset.userRating = reportData.userRating;
+
+  report.innerHTML = `
+    <div class="report-header">
+      <div class="avatar">U</div>
+      <div class="user-info">
+        <strong>${reportData.title}</strong>
+        <small class="timer">Just now</small>
+        <small class="location-info">📍 ${reportData.location}</small>
+      </div>
+    </div>
+    <div class="report-content">
+      <p>${reportData.description}</p>
+      ${reportData.image ? `
+        <div class="image-container" style="margin-top: 10px;">
+          <img src="${typeof reportData.image === 'string' ? reportData.image : URL.createObjectURL(reportData.image)}" alt="Report image" style="max-width: 100%; height: auto; border-radius: 8px;">
+          <div class="geotag-overlay">
+            <span class="geotag-icon">📍</span>
+            <span class="geotag-text">${reportData.location}</span>
+          </div>
+        </div>
+      ` : ""}
+    </div>
+    <div class="report-footer">
+      <div class="report-stats">
+        <div class="stat-item upvote-btn">
+          <span>👍</span>
+          <span>${reportData.likes}</span>
+        </div>
+        <div class="stat-item comment-btn">
+          <span>💬</span>
+          <span>${reportData.comments}</span>
+        </div>
+        <div class="stat-item">
+          <span>👁️</span>
+          <span>${Math.floor(Math.random() * 50) + 10}</span>
+        </div>
+        <div class="stat-item">
+          <span>⭐</span>
+          <span>${reportData.userRating.toFixed(1)}</span>
+        </div>
+      </div>
+      <button class="rating-btn">⭐ Rate Report</button>
+    </div>
+  `;
+
+  // Add event listeners
+  report.querySelector('.rating-btn').addEventListener('click', () => {
+    currentReport = report;
+    modal.style.display = 'flex';
+  });
+
+  // Load random image for new reports if no image provided
+  if (!reportData.image) {
+    loadRandomImageForReport(report);
+  }
+
+  // Add comment functionality
+  report.querySelector('.comment-btn').addEventListener('click', function() {
+    currentCommentReport = report;
+    openCommentModal();
+  });
+
+  // Add upvote functionality
+  report.querySelector('.upvote-btn').addEventListener('click', function() {
+    const likesElement = this.querySelector('span:last-child');
+    let likes = parseInt(likesElement.textContent);
+    likesElement.textContent = likes + 1;
+    this.style.color = 'var(--accent-primary)';
+    this.style.transform = 'scale(1.1)';
+    setTimeout(() => {
+      this.style.transform = 'scale(1)';
+    }, 200);
+  });
+
+  return report;
+}
+
+// ====== ACHIEVEMENTS PAGE ======
+function loadAchievements() {
+  // Update user stats display
+  document.getElementById('userRank').textContent = '#' + userStats.rank;
+  document.getElementById('userReports').textContent = userStats.reportsPosted;
+  document.getElementById('userResolved').textContent = userStats.issuesResolved;
+  document.getElementById('userRating').textContent = userStats.averageRating.toFixed(1);
+  
+  // Update progress section
+  const pointsInCurrentLevel = userStats.citizenPoints % 100;
+  const pointsToNextLevel = 100 - pointsInCurrentLevel;
+  const progressPercentage = (pointsInCurrentLevel / 100) * 100;
+  
+  document.getElementById('progressValue').textContent = `${userStats.citizenPoints} / ${Math.ceil(userStats.citizenPoints / 100) * 100}`;
+  document.getElementById('progressBarFill').style.width = progressPercentage + '%';
+  document.getElementById('progressText').textContent = `${pointsToNextLevel} points to next level!`;
+  
+  // Create podium
+  createPodium();
+  
+  // Create leaderboards
+  createLeaderboards();
+  
+  // Create achievements
+  createAchievements();
+}
+
+function createPodium() {
+  const podium = document.getElementById('podium');
+  const podiumUsers = [
+    { name: "Sarah Johnson", points: 850, img: "https://i.pravatar.cc/100?img=1", class: "first" },
+    { name: "Mike Chen", points: 720, img: "https://i.pravatar.cc/100?img=2", class: "second" },
+    { name: "Priya Sharma", points: 680, img: "https://i.pravatar.cc/100?img=3", class: "third" }
+  ];
+  
+  podium.innerHTML = podiumUsers.map(user => `
+    <div class="podium-card ${user.class}">
+      <img src="${user.img}" alt="${user.name}">
+      <h4>${user.name}</h4>
+      <div class="points">${user.points} pts</div>
+    </div>
+  `).join('');
+}
+
+function createLeaderboards() {
+  const monthlyUsers = [
+    { name: "David Wilson", points: 650 },
+    { name: "Lisa Brown", points: 580 },
+    { name: "Alex Kumar", points: 520 },
+    { name: "Emma Davis", points: 480 },
+    { name: "James Smith", points: 420 },
+    { name: "Maria Garcia", points: 380 },
+    { name: "John Doe", points: 350 },
+    { name: "Anna Lee", points: 320 },
+    { name: "Tom Wilson", points: 290 },
+    { name: "Sara Johnson", points: 250 }
+  ];
+  
+  const allTimeUsers = [
+    { name: "Michael Chen", points: 1250 },
+    { name: "Priya Sharma", points: 1180 },
+    { name: "David Wilson", points: 1100 },
+    { name: "Lisa Brown", points: 1020 },
+    { name: "Alex Kumar", points: 950 },
+    { name: "Emma Davis", points: 880 },
+    { name: "James Smith", points: 820 },
+    { name: "Maria Garcia", points: 760 },
+    { name: "John Doe", points: 700 },
+    { name: "Anna Lee", points: 640 }
+  ];
+  
+  // Monthly leaderboard
+  const monthlyList = document.getElementById('monthlyLeaderboard');
+  monthlyList.innerHTML = monthlyUsers.map((user, index) => `
+    <div class="leaderboard-item">
+      <span class="rank">#${index + 4}</span>
+      <span class="name">${user.name}</span>
+      <span class="points">${user.points} pts</span>
+    </div>
+  `).join('');
+  
+  // All-time leaderboard
+  const allTimeList = document.getElementById('alltimeLeaderboard');
+  allTimeList.innerHTML = allTimeUsers.map((user, index) => `
+    <div class="leaderboard-item">
+      <span class="rank">#${index + 1}</span>
+      <span class="name">${user.name}</span>
+      <span class="points">${user.points} pts</span>
+    </div>
+  `).join('');
+}
+
+function createAchievements() {
+  const achievementList = document.getElementById('achievementList');
+  const achievements = [
+    { icon: "🏆", title: "First Report", description: "Posted your first civic issue" },
+    { icon: "⭐", title: "High Rater", description: "Achieved 4.5+ average rating" },
+    { icon: "🎯", title: "Problem Solver", description: "Helped resolve 10+ issues" },
+    { icon: "🔥", title: "Hot Streak", description: "Posted 5 reports in one week" },
+    { icon: "💪", title: "Community Hero", description: "Reached level 5" },
+    { icon: "🌟", title: "Top Contributor", description: "Ranked in top 20" }
+  ];
+  
+  achievementList.innerHTML = achievements.map(achievement => `
+    <div class="achievement-item">
+      <div class="achievement-icon">${achievement.icon}</div>
+      <div class="achievement-content">
+        <h4>${achievement.title}</h4>
+        <p>${achievement.description}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function switchLeaderboardTab(tab) {
+  // Remove active class from all tabs and lists
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.leaderboard-list').forEach(list => list.classList.remove('active'));
+  
+  // Add active class to selected tab and list
+  event.target.classList.add('active');
+  document.getElementById(tab + 'Leaderboard').classList.add('active');
+}
+
+function updateUserStats() {
+  document.getElementById('userReports').textContent = userStats.reportsPosted;
+  document.getElementById('userResolved').textContent = userStats.issuesResolved;
+  document.getElementById('userRating').textContent = userStats.averageRating.toFixed(1);
+}
+
+function loadUserStats() {
+  // Simulate loading user stats
+  userStats = {
+    reportsPosted: 12,
+    issuesResolved: 8,
+    verifiedReports: 10,
+    averageRating: 4.3,
+    citizenPoints: 450,
+    level: 5,
+    rank: 12
+  };
+  updateUserStats();
+  updateCitizenStats();
+  
+  // Load some sample reports for the my reports table
+  loadSampleMyReports();
+}
+
+function loadSampleMyReports() {
+  const sampleReports = [
+    {
+      title: "Broken Streetlight on Oak Avenue",
+      description: "Streetlight not working, area is dark at night",
+      image: "https://picsum.photos/60/40?random=20",
+      location: "Oak Avenue, Block 200-300",
+      status: "in-progress",
+      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
+    },
+    {
+      title: "Pothole on Main Street",
+      description: "Large pothole causing vehicle damage",
+      image: "https://picsum.photos/60/40?random=21",
+      location: "Main Street, Block A",
+      status: "resolved",
+      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+    },
+    {
+      title: "Overflowing Garbage Bin",
+      description: "Garbage bin not cleared for 3 days",
+      image: "https://picsum.photos/60/40?random=22",
+      location: "Park Avenue, Block B",
+      status: "pending",
+      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
+    }
+  ];
+  
+  myReports = sampleReports;
+  populateMyReportsTable();
+}
+
+function updateCitizenStats() {
+  document.getElementById('citizenPointsDisplay').textContent = userStats.citizenPoints;
+  document.getElementById('citizenLevelDisplay').textContent = userStats.level;
+  document.getElementById('citizenRankDisplay').textContent = '#' + userStats.rank;
+  document.getElementById('reportsSubmittedDisplay').textContent = userStats.reportsPosted;
+  document.getElementById('verifiedReportsDisplay').textContent = userStats.verifiedReports;
+  document.getElementById('resolvedIssuesDisplay').textContent = userStats.issuesResolved;
+  
+  // Calculate progress to next level
+  const pointsInCurrentLevel = userStats.citizenPoints % 100;
+  const pointsToNextLevel = 100 - pointsInCurrentLevel;
+  const progressPercentage = (pointsInCurrentLevel / 100) * 100;
+  
+  document.getElementById('levelProgress').style.width = progressPercentage + '%';
+  document.getElementById('progressText').textContent = `${pointsInCurrentLevel} / 100 points to next level`;
+}
+
+// ====== MY REPORTS FUNCTIONALITY ======
+function populateMyReportsTable() {
+  const tbody = document.getElementById('myReportsTableBody');
+  tbody.innerHTML = '';
+  
+  myReports.forEach((report, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><img src="${report.image || ''}" class="issue-img" alt="Issue image"></td>
+      <td>${report.title}</td>
+      <td><span class="status-badge status-${report.status.replace(' ', '-').toLowerCase()}">${report.status}</span></td>
+      <td>${report.location}</td>
+      <td>${formatDate(report.date)}</td>
+      <td>
+        <div class="action-buttons">
+          <button class="action-btn view" onclick="viewReport(${index})">View</button>
+          <button class="action-btn edit" onclick="editReport(${index})">Edit</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function addToMyReports(reportData) {
+  const newReport = {
+    ...reportData,
+    id: Date.now(),
+    date: new Date(),
+    status: 'pending'
+  };
+  
+  myReports.unshift(newReport);
+  populateMyReportsTable();
+}
+
+function viewReport(index) {
+  const report = myReports[index];
+  // Open modal with report details
+  alert(`Viewing report: ${report.title}\nStatus: ${report.status}\nLocation: ${report.location}`);
+}
+
+function editReport(index) {
+  const report = myReports[index];
+  // Open edit modal or form
+  alert(`Editing report: ${report.title}`);
+}
+
+function formatDate(date) {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+// ====== ANALYTICS PAGE ======
+function loadAnalytics() {
+  // Update metrics
+  document.getElementById('totalResolved').textContent = '1,247';
+  document.getElementById('avgResolutionTime').textContent = '3.2';
+  document.getElementById('userSatisfaction').textContent = '94%';
+  
+  // Create a simple chart
+  const canvas = document.getElementById('resolutionChart');
+  const ctx = canvas.getContext('2d');
+  
+  // Simple bar chart
+  const data = [12, 19, 15, 25, 22, 18, 30];
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw bars
+  const barWidth = canvas.width / data.length;
+  const maxValue = Math.max(...data);
+  
+  data.forEach((value, index) => {
+    const barHeight = (value / maxValue) * (canvas.height - 40);
+    const x = index * barWidth;
+    const y = canvas.height - barHeight - 20;
+    
+    ctx.fillStyle = 'var(--accent-primary)';
+    ctx.fillRect(x + 10, y, barWidth - 20, barHeight);
+    
+    // Draw labels
+    ctx.fillStyle = 'var(--text-primary)';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(labels[index], x + barWidth/2, canvas.height - 5);
+  });
+}
+
+// ====== PROFILE PAGE ======
+function loadProfile() {
+  // Load current user data
+  document.getElementById('profileEmail').value = 'user@example.com';
+  
+  // Add profile form submission
+  document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Profile updated successfully!');
+  });
+}
+
+function changeProfilePicture() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('profileImg').src = e.target.result;
+        alert('Profile picture updated successfully!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  input.click();
+}
+
+// ====== SETTINGS PAGE ======
+function loadSettings() {
+  // Load current settings
+  const fontSize = localStorage.getItem('fontSize') || '16';
+  document.getElementById('fontSize').value = fontSize;
+  document.getElementById('fontSizeValue').textContent = fontSize + 'px';
+  
+  const language = localStorage.getItem('language') || 'en';
+  document.getElementById('language').value = language;
+  
+  const theme = localStorage.getItem('theme') || 'light';
+  document.getElementById('theme').value = theme;
+  
+  // Font size slider
+  document.getElementById('fontSize').addEventListener('input', function() {
+    const size = this.value;
+    document.getElementById('fontSizeValue').textContent = size + 'px';
+    document.body.style.fontSize = size + 'px';
+    localStorage.setItem('fontSize', size);
+  });
+
+  // Theme selector
+  document.getElementById('theme').addEventListener('change', function() {
+    const selectedTheme = this.value;
+    if (selectedTheme === 'auto') {
+      // Auto theme - use system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      updateThemeIcon(prefersDark ? 'dark' : 'light');
+    } else {
+      body.setAttribute('data-theme', selectedTheme);
+      updateThemeIcon(selectedTheme);
+    }
+    localStorage.setItem('theme', selectedTheme);
+  });
+}
+
+function saveSettings() {
+  const settings = {
+    fontSize: document.getElementById('fontSize').value,
+    language: document.getElementById('language').value,
+    theme: document.getElementById('theme').value,
+    emailNotifications: document.getElementById('emailNotifications').checked,
+    pushNotifications: document.getElementById('pushNotifications').checked
+  };
+  
+  // Save to localStorage
+  Object.keys(settings).forEach(key => {
+    localStorage.setItem(key, settings[key]);
+  });
+  
+  // Apply theme if changed
+  if (settings.theme !== 'auto') {
+    body.setAttribute('data-theme', settings.theme);
+    updateThemeIcon(settings.theme);
+  }
+  
+  alert('Settings saved successfully!');
+}
+
+// ====== NEARBY ISSUES ======
+document.addEventListener('DOMContentLoaded', function() {
+  // Add hover functionality to nearby issues
+  document.querySelectorAll('.nearby-item').forEach(item => {
+    item.addEventListener('mouseenter', function() {
+      this.querySelector('.issue-details').style.display = 'block';
+    });
+    
+    item.addEventListener('mouseleave', function() {
+      this.querySelector('.issue-details').style.display = 'none';
+    });
+
+    // Add click functionality for view buttons
+    const viewBtn = item.querySelector('.view-issue-btn');
+    if (viewBtn) {
+      viewBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const issueTitle = item.querySelector('.issue-title').textContent;
+        alert(`Viewing full report for: ${issueTitle}`);
+      });
+    }
+  });
+});
+
+// ====== SEARCH FUNCTIONALITY ======
+searchInput.addEventListener('keyup', () => {
+  const query = searchInput.value.toLowerCase();
+  document.querySelectorAll('.report').forEach(report => {
+    const reportText = report.innerText.toLowerCase();
+    report.style.display = reportText.includes(query) ? 'block' : 'none';
+  });
+  
+  // Also search nearby issues
+  document.querySelectorAll('.nearby-item').forEach(item => {
+    const itemText = item.innerText.toLowerCase();
+    item.style.display = itemText.includes(query) ? 'block' : 'none';
+  });
+});
+
+// ====== RATING SYSTEM ======
+starContainer.addEventListener('click', e => {
+  if(e.target.tagName === 'SPAN'){
+    const value = e.target.dataset.value;
+    starContainer.querySelectorAll('span').forEach(star => star.classList.remove('active'));
+    starContainer.querySelectorAll('span').forEach(star => { 
+      if(star.dataset.value <= value) star.classList.add('active'); 
+    });
+    
+    // Update report rating
+    if (currentReport) {
+      const ratingElement = currentReport.querySelector('.stat-item:last-child span:last-child');
+      ratingElement.textContent = value + '.0';
+      currentReport.dataset.userRating = value;
+    }
+    
+    // Show rating feedback
+    setTimeout(() => {
+      alert(`You rated this report ${value} stars! Thank you for your feedback.`);
+      closeModal();
+    }, 300);
+  }
+});
+
+function closeModal(){ 
+  modal.style.display = 'none'; 
+}
+
+// ====== COMMENT SYSTEM ======
+function openCommentModal() {
+  const commentModal = document.getElementById('commentModal');
+  const commentsContainer = document.getElementById('commentsContainer');
+  const commentInput = document.getElementById('commentInput');
+  
+  // Get report ID (use timestamp as unique identifier)
+  const reportId = currentCommentReport.dataset.timestamp;
+  
+  // Initialize comments for this report if not exists
+  if (!comments[reportId]) {
+    comments[reportId] = [];
+  }
+  
+  // Display existing comments
+  displayComments(reportId);
+  
+  // Show modal
+  commentModal.style.display = 'flex';
+  
+  // Focus on input
+  setTimeout(() => {
+    commentInput.focus();
+  }, 100);
+  
+  // Add Enter key support
+  commentInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      postComment();
+    }
+  });
+}
+
+function closeCommentModal() {
+  const commentModal = document.getElementById('commentModal');
+  commentModal.style.display = 'none';
+  currentCommentReport = null;
+}
+
+function displayComments(reportId) {
+  const commentsContainer = document.getElementById('commentsContainer');
+  const reportComments = comments[reportId] || [];
+  
+  if (reportComments.length === 0) {
+    commentsContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-style: italic;">No comments yet. Be the first to comment!</p>';
+    return;
+  }
+  
+  commentsContainer.innerHTML = reportComments.map(comment => `
+    <div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.9rem;">U</div>
+        <span style="font-weight: 600; color: var(--text-primary);">User</span>
+        <span style="color: var(--text-muted); font-size: 0.8rem;">${comment.timestamp}</span>
+      </div>
+      <p style="margin: 0; color: var(--text-secondary); line-height: 1.4;">${comment.text}</p>
+    </div>
+  `).join('');
+}
+
+function postComment() {
+  const commentInput = document.getElementById('commentInput');
+  const commentText = commentInput.value.trim();
+  
+  if (!commentText) {
+    alert('Please enter a comment.');
+    return;
+  }
+  
+  if (!currentCommentReport) {
+    alert('No report selected.');
+    return;
+  }
+  
+  const reportId = currentCommentReport.dataset.timestamp;
+  
+  // Initialize comments for this report if not exists
+  if (!comments[reportId]) {
+    comments[reportId] = [];
+  }
+  
+  // Add new comment
+  const newComment = {
+    text: commentText,
+    timestamp: getTimeAgo(new Date()),
+    user: 'User'
+  };
+  
+  comments[reportId].push(newComment);
+  
+  // Update comment count in the report
+  const commentCountElement = currentCommentReport.querySelector('.comment-btn span:last-child');
+  let commentCount = parseInt(commentCountElement.textContent);
+  commentCountElement.textContent = commentCount + 1;
+  
+  // Clear input and refresh display
+  commentInput.value = '';
+  displayComments(reportId);
+  
+  // Show success feedback
+  commentInput.placeholder = 'Comment posted!';
+  setTimeout(() => {
+    commentInput.placeholder = 'Write a comment...';
+  }, 2000);
+}
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) {
+    return 'Just now';
+  } else if (diffInSeconds < 3600) {
+    return Math.floor(diffInSeconds / 60) + ' min ago';
+  } else if (diffInSeconds < 86400) {
+    return Math.floor(diffInSeconds / 3600) + ' hr ago';
+  } else {
+    return Math.floor(diffInSeconds / 86400) + ' day ago';
+  }
+}
+
+// ====== UTILITY FUNCTIONS ======
+function updateTimers() {
+  document.querySelectorAll('.report').forEach(report => {
+    const timer = report.querySelector('.timer');
+    const seconds = Math.floor((Date.now() - parseInt(report.dataset.timestamp)) / 1000);
+    
+    if (seconds < 60) {
+      timer.textContent = `${seconds} sec ago`;
+    } else if (seconds < 3600) {
+      timer.textContent = `${Math.floor(seconds/60)} min ago`;
+    } else if (seconds < 86400) {
+      timer.textContent = `${Math.floor(seconds/3600)} hr ago`;
+    } else {
+      timer.textContent = `${Math.floor(seconds/86400)} day ago`;
+    }
+  });
+}
+
+// Update timers every 30 seconds
+setInterval(updateTimers, 30000);
+
+
+// Scroll to report form function
+function scrollToReportForm() {
+  const reportBox = document.querySelector('.report-box');
+  if (reportBox) {
+    reportBox.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start' 
+    });
+    
+    // Focus on the title input after scrolling
+    setTimeout(() => {
+      const titleInput = document.getElementById('title');
+      if (titleInput) {
+        titleInput.focus();
+      }
+    }, 500);
+  }
+}
+
+// Logout function
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    window.location.href = '../SIH_Files-jimeet_updates/SIH_Files-jimeet_updates/portal.html';
+  }
+}
+
+// ====== LOGIN FUNCTIONALITY ======
+function checkLogin() {
+  // Check if user is logged in (for presentation purposes, always allow access)
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  
+  if (!isLoggedIn) {
+    // Simple login prompt for presentation
+    const username = prompt('Enter username (any value works for demo):', 'demo_user');
+    const password = prompt('Enter password (any value works for demo):', 'demo_pass');
+    
+    if (username && password) {
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', username);
+      alert('Login successful! Welcome to Nivaran Dashboard.');
+    } else {
+      alert('Login cancelled. Using demo mode.');
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', 'demo_user');
+    }
+  }
+}
+
+// Initialize everything
+document.addEventListener('DOMContentLoaded', function() {
+  // Check login first
+  checkLogin();
+  
+  // Set up page navigation
+  showPage('main');
+  
+  // Initialize all functionality
+  loadUserStats();
+  loadSettings();
+  
+  // Initialize sticky report form
+  initStickyReportForm();
+});
+
+// ====== STICKY REPORT FORM ======
+function initStickyReportForm() {
+  const reportBox = document.querySelector('.report-box');
+  const originalTop = reportBox.offsetTop;
+  const originalHeight = reportBox.offsetHeight;
+  
+  // Create a placeholder to maintain layout when sticky
+  const placeholder = document.createElement('div');
+  placeholder.style.height = '0px';
+  placeholder.style.transition = 'height 0.3s ease';
+  reportBox.parentNode.insertBefore(placeholder, reportBox.nextSibling);
+  
+  function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const navHeight = document.querySelector('nav').offsetHeight;
+    
+    if (scrollTop > originalTop - navHeight - 20) {
+      // Make sticky
+      reportBox.classList.add('sticky');
+      placeholder.style.height = originalHeight + 'px';
+      
+      // Hide some elements in sticky mode for space
+      const formGroups = reportBox.querySelectorAll('.form-group');
+      formGroups.forEach((group, index) => {
+        if (index > 1) { // Hide image and location fields in sticky mode
+          group.style.display = 'none';
+        }
+      });
+      
+      // Update title to be shorter
+      const title = reportBox.querySelector('h3');
+      if (title.textContent === '📝 Report New Issue') {
+        title.textContent = '📝 Quick Report';
+      }
+    } else {
+      // Remove sticky
+      reportBox.classList.remove('sticky');
+      placeholder.style.height = '0px';
+      
+      // Show all elements
+      const formGroups = reportBox.querySelectorAll('.form-group');
+      formGroups.forEach(group => {
+        group.style.display = 'block';
+      });
+      
+      // Restore original title
+      const title = reportBox.querySelector('h3');
+      if (title.textContent === '📝 Quick Report') {
+        title.textContent = '📝 Report New Issue';
+      }
+    }
+  }
+  
+  // Add scroll listener
+  window.addEventListener('scroll', handleScroll);
+  
+  // Initial check
+  handleScroll();
+}
+</script>
+</body>
+</html>

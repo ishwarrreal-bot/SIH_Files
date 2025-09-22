@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nivaran Admin Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root {
+  --primary-color: #007bff;
+  --bg-light: #f5f8ff;
+  --bg-dark: #1e1e2f;
+  --card-light: #ffffff;
+  --card-dark: #2c2c3e;
+  --text-light: #000;
+  --text-dark: #fff;
+  --priority-high: #ff4d4f;
+  --priority-medium: #faad14;
+  --priority-low: #52c41a;
+}
+
+/* Body */
+body {
+  margin:0; font-family:'Segoe UI',sans-serif; display:flex;
+  background-color: var(--bg-light); color: var(--text-light);
+  transition:0.3s;
+}
+body.dark-mode { background-color: var(--bg-dark); color: var(--text-dark); }
+
+/* Sidebar */
+.sidebar {
+  position:fixed; top:0; left:0; width:220px; height:100vh;
+  background-color: var(--primary-color); color:white; display:flex; flex-direction:column; padding-top:20px;
+}
+.sidebar h2 { text-align:center; margin-bottom:30px; }
+.sidebar a {
+  padding:15px 20px; color:white; text-decoration:none; transition:0.2s;
+}
+.sidebar a:hover { background-color: rgba(255,255,255,0.2); cursor:pointer; }
+
+/* Main content */
+.main {
+  margin-left:220px; padding:20px; flex:1; overflow-y:auto;
+}
+
+/* Top panel */
+.top-panel { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; margin-bottom:15px; }
+.toggle-panel {
+  display:flex; gap:10px; padding:5px 10px; background:#e0f0ff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.1);
+}
+.toggle-panel button {
+  padding:6px 14px; border:none; border-radius:6px; cursor:pointer;
+  background-color:#007bff; color:white; transition:0.3s;
+}
+.toggle-panel button.active { background-color:#0056b3; }
+
+/* Filters */
+.filters { display:flex; flex-wrap:wrap; gap:10px; }
+.filters select, .filters input {
+  padding:6px 10px; border-radius:8px; border:1px solid #ccc;
+  box-shadow:0 1px 3px rgba(0,0,0,0.1); transition:0.3s;
+  background:white; cursor:pointer;
+}
+.filters select:focus, .filters input:focus { outline:none; border-color:#007bff; box-shadow:0 0 5px rgba(0,123,255,0.3); }
+
+/* Dropdown styling for all dropdowns */
+.forward-select { 
+  padding:5px 10px; border-radius:6px; border:1px solid #ccc;
+  box-shadow:0 1px 3px rgba(0,0,0,0.1); transition:0.3s; cursor:pointer;
+  background:white; 
+}
+.forward-select:focus { outline:none; border-color:#007bff; box-shadow:0 0 5px rgba(0,123,255,0.3); }
+
+/* Issue Cards */
+.issue-list { display:flex; flex-direction:column; gap:10px; }
+.card {
+  padding:12px 15px; border-radius:8px; cursor:pointer; transition:0.3s; display:flex; justify-content:space-between; align-items:center;
+  box-shadow:0 1px 4px rgba(0,0,0,0.1);
+}
+.card.high { background: #ffe6e6; border-left: 5px solid var(--priority-high);}
+.card.medium { background: #fff4e6; border-left: 5px solid var(--priority-medium);}
+.card.low { background: #e6ffea; border-left: 5px solid var(--priority-low);}
+body.dark-mode .card { background-color: var(--card-dark); }
+.card:hover { transform:translateY(-3px); box-shadow:0 6px 12px rgba(0,0,0,0.15); }
+
+/* Card detailed info */
+.card-info { display:flex; flex-direction:column; gap:4px; }
+.card-info small { color:gray; }
+
+/* Priority colors */
+.priority { font-weight:bold; }
+.high-prio { color: var(--priority-high);}
+.medium-prio { color: var(--priority-medium);}
+.low-prio { color: var(--priority-low);}
+
+/* Map */
+#map { height:600px; width:100%; border-radius:8px; display:none; margin-top:10px; }
+
+/* Modal */
+.modal {
+  position:fixed; top:-100%; left:50%; transform:translateX(-50%);
+  width:400px; max-width:90%; background-color: var(--card-light); color: var(--text-light);
+  padding:20px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.3); transition:0.5s; z-index:1000;
+}
+body.dark-mode .modal { background-color: var(--card-dark); }
+.modal.active { top:80px; }
+.modal-close { float:right; cursor:pointer; font-size:18px; }
+.modal img { width:100%; border-radius:6px; margin-top:10px; }
+
+/* Toaster */
+.toaster {
+  position:fixed; top:20px; left:50%; transform:translateX(-50%);
+  background-color:#4BB543; color:white; padding:10px 20px; border-radius:6px;
+  opacity:0; transition:0.5s; z-index:2000;
+}
+.toaster.show { opacity:1; }
+
+/* Dark/Light Toggle */
+.theme-toggle {
+  position:fixed; bottom:20px; left:20px; padding:8px 12px; cursor:pointer;
+  background-color:white; color:var(--primary-color); border:none; border-radius:4px;
+}
+body.dark-mode .theme-toggle { background-color:var(--primary-color); color:white; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Admin</h2>
+  <a href="admin_dashboard.html">Dashboard</a>
+  <a href="admin_reports.html">Reports</a>
+  <a href="admin_department.html">Workers / Departments</a>
+  <a href="admin_statistics.html">Analytics / Statistics</a>
+  <a href="admin_settings.html">Settings / Profile</a>
+  <a href="portal.html">Logout</a>
+</div>
+
+<div class="main">
+  <div class="top-panel">
+    <div class="toggle-panel">
+      <button class="toggle-btn active" data-view="list">Vertical List</button>
+      <button class="toggle-btn" data-view="map">Map View</button>
+    </div>
+    <div class="filters">
+      <select id="area"><option value="">Area</option><option>Downtown</option><option>Uptown</option></select>
+      <select id="buildings"><option value="">Nearby Buildings</option><option>School</option><option>Hospital</option></select>
+      <input type="number" id="voters" placeholder="No. of voters">
+      <select id="priority"><option value="">Priority</option><option>High</option><option>Medium</option><option>Low</option></select>
+      <select id="worker"><option value="">Closest Worker</option><option>Worker A</option><option>Worker B</option></select>
+    </div>
+  </div>
+
+  <div class="issue-list" id="issueList"></div>
+  <div id="map"></div>
+</div>
+
+<div class="modal" id="issueModal">
+  <span class="modal-close" onclick="closeModal()">✖</span>
+  <h3 id="modalTitle"></h3>
+  <p><strong>User:</strong> <span id="modalUser"></span></p>
+  <p><strong>Location:</strong> <span id="modalLocation"></span></p>
+  <p><strong>Priority:</strong> <span id="modalPriority"></span></p>
+  <p id="modalDesc"></p>
+  <img id="modalImg" src="" alt="Issue Image">
+  <select class="forward-select" onchange="showToaster()">
+    <option>Forward To</option><option>Worker A</option><option>Worker B</option>
+  </select>
+</div>
+
+<div class="toaster" id="toaster">Issue Forwarded!</div>
+<button class="theme-toggle" onclick="toggleTheme()">Dark/Light Mode</button>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Issues Data
+const issues=[
+  {name:"Pothole", user:"Alice", location:"Downtown", priority:"High", desc:"Road damaged near intersection, causing traffic delays. Needs urgent repair.", building:"School", voters:200, worker:"Worker A"},
+  {name:"Street Light", user:"Bob", location:"Uptown", priority:"Medium", desc:"Light not working near park, area is dimly lit at night.", building:"Hospital", voters:150, worker:"Worker B"},
+  {name:"Garbage", user:"Charlie", location:"Downtown", priority:"Low", desc:"Overflowing trash bins causing foul smell, minor health concern.", building:"School", voters:100, worker:"Worker A"},
+  {name:"Water Leak", user:"David", location:"Uptown", priority:"High", desc:"Leak near main road affecting traffic and nearby houses.", building:"Hospital", voters:250, worker:"Worker B"},
+  {name:"Broken Bench", user:"Eve", location:"Downtown", priority:"Medium", desc:"Park bench damaged, unsafe for public use.", building:"School", voters:50, worker:"Worker A"},
+  {name:"Tree Removal", user:"Frank", location:"Uptown", priority:"Low", desc:"Fallen tree blocking pedestrian path, minor obstruction.", building:"Hospital", voters:70, worker:"Worker B"},
+  {name:"Noise Complaint", user:"Grace", location:"Downtown", priority:"High", desc:"Construction noise beyond permissible hours.", building:"School", voters:300, worker:"Worker A"},
+  {name:"Traffic Signal", user:"Heidi", location:"Uptown", priority:"Medium", desc:"Signal blinking irregularly, causing traffic confusion.", building:"Hospital", voters:120, worker:"Worker B"},
+  {name:"Drainage Issue", user:"Ivan", location:"Downtown", priority:"Low", desc:"Water stagnates after rain, slippery roads.", building:"School", voters:80, worker:"Worker A"},
+  {name:"Graffiti", user:"Judy", location:"Uptown", priority:"High", desc:"Walls painted illegally, affects neighborhood aesthetics.", building:"Hospital", voters:60, worker:"Worker B"},
+];
+
+let map;
+let mapInitialized=false;
+
+// DOM Elements
+const issueList=document.getElementById("issueList");
+const areaFilter=document.getElementById('area');
+const buildingFilter=document.getElementById('buildings');
+const priorityFilter=document.getElementById('priority');
+const workerFilter=document.getElementById('worker');
+const votersFilter=document.getElementById('voters');
+
+// Render Cards
+function renderCards(filteredIssues){
+  issueList.innerHTML='';
+  filteredIssues.forEach(issue=>{
+    const card=document.createElement("div");
+    card.className=`card ${issue.priority.toLowerCase()}`;
+    card.innerHTML=`<div class="card-info">
+      <strong>${issue.name}</strong>
+      <small><strong>User:</strong> ${issue.user}</small>
+      <small><strong>Location:</strong> ${issue.location}</small>
+      <small class="priority ${issue.priority.toLowerCase()}">Priority: ${issue.priority}</small>
+      <small>${issue.desc.substring(0,70)}...</small>
+      <select class="forward-select" onchange="showToaster()">
+        <option>Forward To</option><option>Worker A</option><option>Worker B</option>
+      </select>
+    </div>`;
+    card.onclick=()=>openModal(issue);
+    issueList.appendChild(card);
+  });
+  updateMap(filteredIssues);
+}
+
+// Filter Function
+function applyFilters(){
+  const filtered=issues.filter(issue=>{
+    return (areaFilter.value==='' || issue.location===areaFilter.value)
+        && (buildingFilter.value==='' || issue.building===buildingFilter.value)
+        && (priorityFilter.value==='' || issue.priority===priorityFilter.value)
+        && (workerFilter.value==='' || issue.worker===workerFilter.value)
+        && (votersFilter.value==='' || issue.voters==Number(votersFilter.value));
+  });
+  renderCards(filtered);
+}
+
+// Event Listeners
+[areaFilter, buildingFilter, priorityFilter, workerFilter, votersFilter].forEach(f=>f.addEventListener('change',applyFilters));
+
+// Toggle View
+const toggleBtns=document.querySelectorAll(".toggle-btn");
+const mapDiv=document.getElementById("map");
+toggleBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    toggleBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    if(btn.dataset.view==="list"){ issueList.style.display="flex"; mapDiv.style.display="none"; }
+    else{ issueList.style.display="none"; mapDiv.style.display="block"; initMap(); }
+  });
+});
+
+// Modal
+function openModal(issue){
+  document.getElementById("modalTitle").innerText=issue.name;
+  document.getElementById("modalUser").innerText=issue.user;
+  document.getElementById("modalLocation").innerText=issue.location;
+  document.getElementById("modalPriority").innerText=issue.priority;
+  document.getElementById("modalDesc").innerText=issue.desc;
+  document.getElementById("modalImg").src=`https://picsum.photos/400/200?random=${Math.floor(Math.random()*100)}`;
+  document.getElementById("issueModal").classList.add("active");
+}
+function closeModal(){ document.getElementById("issueModal").classList.remove("active"); }
+
+// Toaster
+function showToaster(){
+  const toaster=document.getElementById("toaster");
+  toaster.classList.add("show");
+  setTimeout(()=>toaster.classList.remove("show"),2000);
+}
+
+// Dark/Light Mode
+function toggleTheme(){ document.body.classList.toggle("dark-mode"); }
+
+// Map
+function initMap(){
+  if(mapInitialized) return;
+  mapInitialized=true;
+  map=L.map('map');
+  const markers=[];
+  issues.forEach(issue=>{
+    const lat=20.5937+(Math.random()-0.5)*0.1;
+    const lng=78.9629+(Math.random()-0.5)*0.1;
+    const marker=L.marker([lat,lng]).addTo(map);
+    marker.bindPopup(`<b>${issue.name}</b><br>${issue.location}<br>
+    <select class="forward-select" onchange="showToaster()">
+      <option>Forward To</option><option>Worker A</option><option>Worker B</option>
+    </select>
+    <br><button onclick='openModal(${JSON.stringify(issue)})'>Details</button>`);
+    markers.push(marker);
+  });
+  const group=L.featureGroup(markers);
+  map.fitBounds(group.getBounds().pad(0.2));
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+}
+
+// Initial Render
+renderCards(issues);
+</script>
+</body>
+</html>

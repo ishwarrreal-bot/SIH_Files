@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Settings</title>
+<style>
+:root {
+  --primary-color: #007bff;
+  --bg-light: #f5f8ff;
+  --bg-dark: #1e1e2f;
+  --card-light: #ffffff;
+  --card-dark: #2c2c3e;
+  --text-light: #000;
+  --text-dark: #fff;
+}
+
+body {
+  margin:0; font-family:'Segoe UI',sans-serif;
+  background-color: var(--bg-light); color: var(--text-light); transition:0.3s;
+}
+body.dark-mode { background-color: var(--bg-dark); color: var(--text-dark); }
+
+/* Sidebar */
+.sidebar {
+  position:fixed; top:0; left:0; width:220px; height:100vh;
+  background-color: var(--primary-color); color:white; display:flex; flex-direction:column; padding-top:20px;
+}
+.sidebar h2 { text-align:center; margin-bottom:30px; }
+.sidebar a { padding:15px 20px; color:white; text-decoration:none; transition:0.2s; }
+.sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.2); cursor:pointer; }
+
+/* Main Content */
+.main { margin-left:220px; padding:30px; display:flex; flex-direction:column; align-items:center; }
+
+/* Sections / Cards */
+.section {
+  background-color: var(--card-light); padding:20px; border-radius:10px; margin-bottom:20px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1); width:100%; max-width:500px; text-align:center;
+  transition:0.3s;
+}
+body.dark-mode .section { background-color: var(--card-dark); }
+.section h3 { margin-top:0; margin-bottom:15px; }
+
+/* Profile Image */
+.profile-img {
+  width:120px; height:120px; border-radius:50%; object-fit:cover;
+  margin-bottom:15px; box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  border:3px solid var(--primary-color);
+}
+
+/* Form Inputs */
+input[type="text"], input[type="email"], input[type="password"], select {
+  width:100%; padding:10px; margin-bottom:12px; border-radius:6px; border:1px solid #ccc; transition:0.3s;
+}
+input:focus, select:focus { outline:none; border-color:#007bff; box-shadow:0 0 5px rgba(0,123,255,0.3); }
+
+/* Toggle Switch */
+.switch { position: relative; display: inline-block; width:50px; height:24px; }
+.switch input { opacity:0; width:0; height:0; }
+.slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; transition:.4s; border-radius:24px; }
+.slider:before { position:absolute; content:""; height:20px; width:20px; left:2px; bottom:2px; background:white; transition:.4s; border-radius:50%; }
+input:checked + .slider { background:#007bff; }
+input:checked + .slider:before { transform:translateX(26px); }
+
+/* Buttons */
+button { padding:10px 18px; border:none; border-radius:6px; background-color:#007bff; color:white; cursor:pointer; transition:0.3s; margin-right:10px; }
+button:hover { background-color:#0056b3; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Admin</h2>
+  <a href="admin_dashboard.html">Dashboard</a>
+  <a href="admin_reports.html">Reports</a>
+  <a href="admin_department.html">Workers / Departments</a>
+  <a href="admin_statistics.html">Analytics / Statistics</a>
+  <a href="admin_settings.html">Settings / Profile</a>
+  <a href="portal.html#admin-login">Logout</a>
+</div>
+
+<div class="main">
+
+  <!-- Profile Section -->
+  <div class="section">
+    <img class="profile-img" src="https://picsum.photos/200" alt="Profile Image">
+    <h3>Profile Information</h3>
+    <input type="text" placeholder="Name" value="John Doe">
+    <input type="text" placeholder="Department" value="Sanitation">
+    <input type="email" placeholder="Email" value="john@example.com">
+    <input type="text" placeholder="Phone" value="+91 9876543210">
+    <button onclick="saveProfile()">Save Changes</button>
+  </div>
+
+  <!-- Change Password -->
+  <div class="section">
+    <h3>Change Password</h3>
+    <input type="password" placeholder="Old Password">
+    <input type="password" placeholder="New Password">
+    <input type="password" placeholder="Confirm New Password">
+    <button onclick="changePassword()">Update Password</button>
+  </div>
+
+  <!-- Notifications -->
+  <div class="section">
+    <h3>Notification Preferences</h3>
+    <label>Email Notifications
+      <label class="switch">
+        <input type="checkbox" checked>
+        <span class="slider"></span>
+      </label>
+    </label><br><br>
+    <label>In-App Notifications
+      <label class="switch">
+        <input type="checkbox" checked>
+        <span class="slider"></span>
+      </label>
+    </label>
+  </div>
+
+  <!-- Theme Preference -->
+  <div class="section">
+    <h3>Theme Preference</h3>
+    <label>Dark Mode
+      <label class="switch">
+        <input type="checkbox" onchange="toggleTheme()">
+        <span class="slider"></span>
+      </label>
+    </label>
+  </div>
+
+</div>
+
+<script>
+function toggleTheme(){ document.body.classList.toggle('dark-mode'); }
+function saveProfile(){ alert('Profile changes saved successfully!'); }
+function changePassword(){ alert('Password updated successfully!'); }
+</script>
+
+</body>
+</html>

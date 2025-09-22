@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nivaran - Reported Issues</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f9;
+      color: #2c3e50;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Dark Theme */
+    body.dark {
+      background: #1e1e2f;
+      color: #f4f6f9;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+
+    body.dark .navbar {
+      background: #2d2d3a;
+    }
+
+    .navbar .logo {
+      font-size: 28px;   /* bigger font */
+      font-weight: bold;
+      color: #00b0ff;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    /* Sidebar (now right side) */
+    .sidebar {
+      position: fixed;
+      top: 60px; /* below navbar */
+      right: -200px; /* hidden initially */
+      left: auto;
+      width: 200px;
+      height: 100%;
+      background: #2c3e50;
+      color: white;
+      transition: right 0.3s;
+      padding-top: 10px;
+      z-index: 999;
+    }
+
+    body.dark .sidebar {
+      background: #111827;
+    }
+
+    .sidebar.active {
+      right: 0;
+    }
+
+    .menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .menu li {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .menu li:hover {
+      background: #34495e;
+    }
+
+    body.dark .menu li:hover {
+      background: #1f2937;
+    }
+
+    .menu img {
+      width: 24px;
+      height: 24px;
+      margin-right: 12px;
+    }
+
+    /* Hamburger */
+    .hamburger {
+      font-size: 26px;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    /* Main content */
+    .main-content {
+      margin-top: 70px; /* below navbar */
+      padding: 20px;
+      transition: margin-left 0.3s;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.2s, background 0.3s, color 0.3s;
+    }
+
+    body.dark .card {
+      background: #2d2d3a;
+      color: #f4f6f9;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 15px;
+    }
+
+    .card-content h4 {
+      margin: 0 0 10px;
+      color: #2c3e50;
+    }
+
+    body.dark .card-content h4 {
+      color: #f4f6f9;
+    }
+
+    .card-content p {
+      margin: 0;
+      color: #555;
+    }
+
+    body.dark .card-content p {
+      color: #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo">Nivaran</div>
+    <div class="navbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()">🌗</button>
+      <span class="hamburger" onclick="toggleSidebar()">☰</span>
+    </div>
+  </div>
+
+  <!-- Sidebar (right side) -->
+  <div class="sidebar" id="sidebar">
+    <ul class="menu">
+      <li><img src="https://img.icons8.com/ios-filled/50/ffffff/home.png"/> Home</li>
+      <li><img src="https://img.icons8.com/ios-filled/50/ffffff/add-file.png"/> Report</li>
+      <li><img src="https://img.icons8.com/ios-filled/50/ffffff/marker.png"/> My Area</li>
+      <li><img src="https://img.icons8.com/ios-filled/50/ffffff/logout-rounded.png"/> Logout</li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>📋 Reported Issues - Nivaran</h1>
+
+    <div class="card-grid">
+      <div class="card">
+        <img src="https://picsum.photos/300/160?random=1" alt="Issue Image">
+        <div class="card-content">
+          <h4>Pothole Reported</h4>
+          <p><strong>Location:</strong> MG Road, Mumbai</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="https://picsum.photos/300/160?random=2" alt="Issue Image">
+        <div class="card-content">
+          <h4>Streetlight Not Working</h4>
+          <p><strong>Location:</strong> Sector 15, Noida</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="https://picsum.photos/300/160?random=3" alt="Issue Image">
+        <div class="card-content">
+          <h4>Garbage Dump</h4>
+          <p><strong>Location:</strong> Near Railway Station, Pune</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+    }
+  </script>
+
+</body>
+</html>
