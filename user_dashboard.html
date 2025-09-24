@@ -324,6 +324,51 @@
       .modal button:hover {
         background: var(--secondary);
       }
+      /* DARK MODE TOGGLE */
+      .mode-toggle {
+        cursor: pointer;
+        font-size: 1.2rem;
+        margin-left: 1rem;
+        position: relative;
+        z-index: 1000;
+      }
+      .checkbox {
+        opacity: 0;
+        position: absolute;
+      }
+      .label {
+        background-color: #111;
+        border-radius: 50px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px;
+        position: relative;
+        height: 26px;
+        width: 50px;
+        transition: background-color 0.3s ease;
+      }
+      .label .ball {
+        background-color: #fff;
+        border-radius: 50%;
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        height: 22px;
+        width: 22px;
+        transform: translateX(0px);
+        transition: transform 0.3s linear, background-color 0.3s ease;
+      }
+      .checkbox:checked + .label .ball {
+        transform: translateX(24px);
+      }
+      .fa-moon {
+        color: #f1c40f;
+      }
+      .fa-sun {
+        color: #f39c12;
+      }
     </style>
   </head>
   <body>
@@ -338,7 +383,15 @@
           Leaderboard
         </button>
         <button onclick="logout()">Logout</button>
-        <span class="mode-toggle" onclick="toggleTheme()">🌗</span>
+        <!-- DARK MODE TOGGLE -->
+        <div class="mode-toggle">
+          <input type="checkbox" id="darkModeToggle" class="checkbox">
+          <label for="darkModeToggle" class="label">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+            <div class="ball"></div>
+          </label>
+        </div>
       </div>
     </header>
 
@@ -663,13 +716,24 @@
         window.location.href = "portal.html";
       }
 
-      // DARK/LIGHT TOGGLE
-      function toggleTheme() {
-        const html = document.documentElement;
-        if (html.getAttribute("data-theme") === "dark")
-          html.removeAttribute("data-theme");
-        else html.setAttribute("data-theme", "dark");
+      // DARK MODE TOGGLE
+      const darkModeToggle = document.getElementById("darkModeToggle");
+      const html = document.documentElement;
+
+      if (localStorage.getItem("darkMode") === "true") {
+        darkModeToggle.checked = true;
+        html.setAttribute("data-theme", "dark");
       }
+
+      darkModeToggle.addEventListener("change", () => {
+        if (darkModeToggle.checked) {
+          html.setAttribute("data-theme", "dark");
+          localStorage.setItem("darkMode", "true");
+        } else {
+          html.removeAttribute("data-theme");
+          localStorage.setItem("darkMode", "false");
+        }
+      });
 
       // Dummy progress update
       let points = 420;
